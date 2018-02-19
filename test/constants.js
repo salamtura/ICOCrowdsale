@@ -2,6 +2,8 @@ import { ether } from './utils';
 
 const ether1 = ether(1).toNumber();
 const div = 10;
+const HARDCAP_TOKENS_PRE_ICO = ether(36000000);
+const HARDCAP_TOKENS_ICO = ether(84000000);
 
 export const reservedTokensForFounders = ether(23500000);
 export const validAmountForFounders = reservedTokensForFounders.div(div);
@@ -12,6 +14,11 @@ export const validAmountForBountyProgram = reservedTokensForBountyProgram.div(di
 export const invalidAmountForBountyProgram = reservedTokensForBountyProgram.add(ether1);
 
 export const reservedTokensForPlatformOperations = ether(70588235);
+
+export const compaignAllocationAndBonusesTokens = ether(11725883);
+
+export const tokensRemainingPreIco = HARDCAP_TOKENS_PRE_ICO;
+export const tokensRemainingIco = HARDCAP_TOKENS_PRE_ICO.add(HARDCAP_TOKENS_ICO);
 
 export const totalSupply = ether(235294118);
 

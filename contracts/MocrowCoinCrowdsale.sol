@@ -67,9 +67,6 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
 
     uint256 public compaignAllocationAndBonusRemainingTokens = COMPAIGN_ALLOCATION_AND_BONUSES_TOKENS;
 
-    bool public isUnsoldTokensTransfered = false;
-    bool public isRemainingCompaignAllocationAndBonusTokensTransfered = false;
-
     MocrowCoin public token;
 
     modifier beforePreIcoSalePeriod() {
@@ -350,10 +347,10 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Transfer tokens only for administrators or owner and only after ICO period.
     */
     function transferRemainingCompaignAllocationAndBonusTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
-        require(!isRemainingCompaignAllocationAndBonusTokensTransfered);
+        require(compaignAllocationAndBonusRemainingTokens > 0);
         token.transfer(addressForCampaignAllocation, compaignAllocationAndBonusRemainingTokens);
-        isRemainingCompaignAllocationAndBonusTokensTransfered = true;
-        if (isRemainingCompaignAllocationAndBonusTokensTransfered && isUnsoldTokensTransfered) {
+        compaignAllocationAndBonusRemainingTokens = 0;
+        if (compaignAllocationAndBonusRemainingTokens == 0 && tokensRemainingIco == 0) {
             token.transferOwnership(owner);
             whitelist.transferOwnership(owner);
         }
@@ -364,10 +361,10 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Transfer tokens only for administrators or owner and only after ICO period.
     */
     function transferUnsoldTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
-        require(!isUnsoldTokensTransfered);
+        require(tokensRemainingIco > 0);
         token.transfer(addressForUnsoldTokens, tokensRemainingIco);
-        isUnsoldTokensTransfered = true;
-        if (isRemainingCompaignAllocationAndBonusTokensTransfered && isUnsoldTokensTransfered) {
+        tokensRemainingIco = 0;
+        if (compaignAllocationAndBonusRemainingTokens == 0 && tokensRemainingIco == 0) {
             token.transferOwnership(owner);
             whitelist.transferOwnership(owner);
         }
