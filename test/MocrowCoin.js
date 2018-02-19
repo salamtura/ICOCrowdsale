@@ -15,7 +15,7 @@ contract('MocrowCoin', (wallets) => {
   const { owner, founders, bountyProgram, withdrawal1, client3 } = getDefaultWallets(wallets);
 
   describe('should have correct parameters', function () {
-    const expectedTokenName = 'MOCROW COIN';
+    const expectedTokenName = 'MOCROW';
     const expectedTokenSymbol = 'MCW';
     const expectedTokenDecimals = 18;
     before(async () => {

@@ -24,6 +24,8 @@ const MocrowCoin = artifacts.require('MocrowCoin');
 const MocrowCoinCrowdsale = artifacts.require('MocrowCoinCrowdsale');
 const Whitelist = artifacts.require('Whitelist');
 
+// Commented tests work only with some functions,
+// which must be included into contract in dev mode, BUT NOT IN PRODUCTION!
 contract('MocrowCoinCrowdsale', function (wallets) {
   const {
     owner,
@@ -837,27 +839,27 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         nothingWasChanged();
       });
-      // only with function like below in contract;
-      //
-      // function dropTokensRemaining() public {
-      //   tokensRemainingPreIco = 0;
-      //   tokensRemainingIco = 0;
-      // }
-      describe('tokensRemainingPreIco == 0:', () => {
-        before(async () => {
-          await defaultBefore();
-          await timeController.addSeconds(preIcoStartShift);
-          await this.crowdsale.dropTokensRemaining();
-          this.tokensRemainingPreIcoBefore = ether(0);
-          this.tokensRemainingIcoBefore = ether(0);
-          const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
-            from: client1,
-            value: minimalInvestment,
-          });
-          await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
-        });
-        nothingWasChanged();
-      });
+      // describe('tokensRemainingPreIco == 0:', () => {
+      // // only with function like below in contract;
+      // //
+      // // function dropTokensRemaining() public {
+      // //   tokensRemainingPreIco = 0;
+      // //   tokensRemainingIco = 0;
+      // // }
+      //   before(async () => {
+      //     await defaultBefore();
+      //     await timeController.addSeconds(preIcoStartShift);
+      //     await this.crowdsale.dropTokensRemaining();
+      //     this.tokensRemainingPreIcoBefore = ether(0);
+      //     this.tokensRemainingIcoBefore = ether(0);
+      //     const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
+      //       from: client1,
+      //       value: minimalInvestment,
+      //     });
+      //     await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
+      //   });
+      //   nothingWasChanged();
+      // });
     });
     describe('right parameters:', () => {
       describe('common requests:', () => {
@@ -966,87 +968,87 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
       });
 
-      describe('purchase more then remaining tokens:', () => {
-        // only with function like below in contract
-        // function dropTokensRemainingPreIcoToMinimum() public {
-        //   tokensRemainingPreIco = 11152 * (10 ** 18);
-        //   tokensRemainingIco = HARDCAP_TOKENS_ICO + tokensRemainingPreIco;
-        // }
-        before(async () => {
-          await defaultBefore();
-          await timeController.addSeconds(preIcoStartShift);
-          await this.crowdsale.dropTokensRemainingPreIcoToMinimum({ from: owner });
-          this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensPreIco.add(purchaseOneEth);
-          await this.crowdsale.sellTokensPreIco({
-            from: client1,
-            value: this.purchaseMoreThenRemaining,
-          });
-        });
-        it('client 1 balance decreased after purchase', async () => {
-          const client1BalanceAfter = ethBalance(client1).toNumber();
-          assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
-        });
-
-        it('withdrawal wallet 1 balance after purchase', async () => {
-          const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-          this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal1Percent);
-          assertEqualBigNumbers(
-            withdrawal1BalanceAfter,
-            this.withdrawal1BalanceBefore
-              .add(this.client1Withdrawal1Value)
-              .toNumber(),
-          );
-        });
-
-        it('withdrawal wallet 2 balance after purchase', async () => {
-          const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-          this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal2Percent);
-          assertEqualBigNumbers(
-            withdrawal2BalanceAfter,
-            this.withdrawal2BalanceBefore
-              .add(this.client1Withdrawal2Value)
-              .toNumber(),
-          );
-        });
-        it('withdrawal wallet 3 balance after purchase', async () => {
-          const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-          this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal3Percent);
-          assertEqualBigNumbers(
-            withdrawal3BalanceAfter,
-            this.withdrawal3BalanceBefore
-              .add(this.client1Withdrawal3Value)
-              .toNumber(),
-          );
-        });
-        it('withdrawal wallet 4 balance after purchase', async () => {
-          const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
-          this.client1Withdrawal4Value = weiEquivalentToRemainingTokensPreIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
-          assertEqualBigNumbers(
-            withdrawal4BalanceAfter,
-            this.withdrawal4BalanceBefore
-              .add(this.client1Withdrawal4Value)
-              .toNumber(),
-          );
-        });
-        it('pre-ICO tokens remaining after purchase', async () => {
-          const tokensRemainingPreIcoAfter = (await this.crowdsale.tokensRemainingPreIco()).toNumber();
-          assertEqual(tokensRemainingPreIcoAfter, 0);
-        });
-        it('ICO tokens remaining after purchase', async () => {
-          const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
-          assertEqual(tokensRemainingIcoAfter, icoHardcap);
-        });
-
-        it('tokens amount of client 1 after purchase', async () => {
-          const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
-          assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(weiEquivalentToRemainingTokensPreIco.div(tokenRatePreIco)).toNumber());
-        });
-
-        it('investor(client) 1 purchase value', async () => {
-          const investment1Value = (await this.crowdsale.investmentsPreIco(client1)).toNumber();
-          assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensPreIco.toNumber());
-        });
-      });
+      // describe('purchase more then remaining tokens:', () => {
+      //   // only with function like below in contract
+      //   // function dropTokensRemainingPreIcoToMinimum() public {
+      //   //   tokensRemainingPreIco = 11152 * (10 ** 18);
+      //   //   tokensRemainingIco = HARDCAP_TOKENS_ICO + tokensRemainingPreIco;
+      //   // }
+      //   before(async () => {
+      //     await defaultBefore();
+      //     await timeController.addSeconds(preIcoStartShift);
+      //     await this.crowdsale.dropTokensRemainingPreIcoToMinimum({ from: owner });
+      //     this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensPreIco.add(purchaseOneEth);
+      //     await this.crowdsale.sellTokensPreIco({
+      //       from: client1,
+      //       value: this.purchaseMoreThenRemaining,
+      //     });
+      //   });
+      //   it('client 1 balance decreased after purchase', async () => {
+      //     const client1BalanceAfter = ethBalance(client1).toNumber();
+      //     assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
+      //   });
+      //
+      //   it('withdrawal wallet 1 balance after purchase', async () => {
+      //     const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
+      //     this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal1Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal1BalanceAfter,
+      //       this.withdrawal1BalanceBefore
+      //         .add(this.client1Withdrawal1Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //
+      //   it('withdrawal wallet 2 balance after purchase', async () => {
+      //     const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
+      //     this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal2Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal2BalanceAfter,
+      //       this.withdrawal2BalanceBefore
+      //         .add(this.client1Withdrawal2Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('withdrawal wallet 3 balance after purchase', async () => {
+      //     const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
+      //     this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal3Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal3BalanceAfter,
+      //       this.withdrawal3BalanceBefore
+      //         .add(this.client1Withdrawal3Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('withdrawal wallet 4 balance after purchase', async () => {
+      //     const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
+      //     this.client1Withdrawal4Value = weiEquivalentToRemainingTokensPreIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
+      //     assertEqualBigNumbers(
+      //       withdrawal4BalanceAfter,
+      //       this.withdrawal4BalanceBefore
+      //         .add(this.client1Withdrawal4Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('pre-ICO tokens remaining after purchase', async () => {
+      //     const tokensRemainingPreIcoAfter = (await this.crowdsale.tokensRemainingPreIco()).toNumber();
+      //     assertEqual(tokensRemainingPreIcoAfter, 0);
+      //   });
+      //   it('ICO tokens remaining after purchase', async () => {
+      //     const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
+      //     assertEqual(tokensRemainingIcoAfter, icoHardcap);
+      //   });
+      //
+      //   it('tokens amount of client 1 after purchase', async () => {
+      //     const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
+      //     assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(weiEquivalentToRemainingTokensPreIco.div(tokenRatePreIco)).toNumber());
+      //   });
+      //
+      //   it('investor(client) 1 purchase value', async () => {
+      //     const investment1Value = (await this.crowdsale.investmentsPreIco(client1)).toNumber();
+      //     assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensPreIco.toNumber());
+      //   });
+      // });
     });
   });
 
@@ -1202,27 +1204,27 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         nothingWasChanged();
       });
-      describe('tokensRemainingIco == 0:', () => {
-        // only with function like below in contract;
-        //
-        // function dropTokensRemaining() public {
-        //   tokensRemainingPreIco = 0;
-        //   tokensRemainingIco = 0;
-        // }
-        before(async () => {
-          await defaultBefore();
-          await timeController.addSeconds(preIcoStartShift);
-          await this.crowdsale.dropTokensRemaining();
-          this.tokensRemainingPreIcoBefore = ether(0);
-          this.tokensRemainingIcoBefore = ether(0);
-          const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
-            from: client1,
-            value: minimalInvestment,
-          });
-          await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
-        });
-        nothingWasChanged();
-      });
+      // describe('tokensRemainingIco == 0:', () => {
+      //   // only with function like below in contract;
+      //   //
+      //   // function dropTokensRemaining() public {
+      //   //   tokensRemainingPreIco = 0;
+      //   //   tokensRemainingIco = 0;
+      //   // }
+      //   before(async () => {
+      //     await defaultBefore();
+      //     await timeController.addSeconds(preIcoStartShift);
+      //     await this.crowdsale.dropTokensRemaining();
+      //     this.tokensRemainingPreIcoBefore = ether(0);
+      //     this.tokensRemainingIcoBefore = ether(0);
+      //     const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
+      //       from: client1,
+      //       value: minimalInvestment,
+      //     });
+      //     await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
+      //   });
+      //   nothingWasChanged();
+      // });
     });
     describe('right parameters:', () => {
       describe('common requests:', () => {
@@ -1355,86 +1357,86 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
       });
 
-      describe('purchase more then remaining tokens:', () => {
-        // only with function like below in contract
-        // function dropTokensRemainingIcoToMinimum() public {
-        //   tokensRemainingPreIco = 0;
-        //   tokensRemainingIco = 5576 * (10 ** 18);
-        // }
-        before(async () => {
-          await defaultBefore();
-          await timeController.addSeconds(icoStartShift);
-          await this.crowdsale.dropTokensRemainingIcoToMinimum({ from: owner });
-          await this.crowdsale.compaignAllocationAndBonusRemainingTokens({ from: owner });
-          this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensIco.add(purchaseOneEth);
-          await this.crowdsale.sellTokensIco({
-            from: client1,
-            value: this.purchaseMoreThenRemaining,
-          });
-        });
-        it('client 1 balance decreased after purchase', async () => {
-          const client1BalanceAfter = ethBalance(client1).toNumber();
-          assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
-        });
-
-        it('withdrawal wallet 1 balance after purchase', async () => {
-          const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-          this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal1Percent);
-          assertEqualBigNumbers(
-            withdrawal1BalanceAfter,
-            this.withdrawal1BalanceBefore
-              .add(this.client1Withdrawal1Value)
-              .toNumber(),
-          );
-        });
-
-        it('withdrawal wallet 2 balance after purchase', async () => {
-          const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-          this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal2Percent);
-          assertEqualBigNumbers(
-            withdrawal2BalanceAfter,
-            this.withdrawal2BalanceBefore
-              .add(this.client1Withdrawal2Value)
-              .toNumber(),
-          );
-        });
-        it('withdrawal wallet 3 balance after purchase', async () => {
-          const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-          this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal3Percent);
-          assertEqualBigNumbers(
-            withdrawal3BalanceAfter,
-            this.withdrawal3BalanceBefore
-              .add(this.client1Withdrawal3Value)
-              .toNumber(),
-          );
-        });
-        it('withdrawal wallet 4 balance after purchase', async () => {
-          const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
-          this.client1Withdrawal4Value = weiEquivalentToRemainingTokensIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
-          assertEqualBigNumbers(
-            withdrawal4BalanceAfter,
-            this.withdrawal4BalanceBefore
-              .add(this.client1Withdrawal4Value)
-              .toNumber(),
-          );
-        });
-        it('ICO tokens remaining after purchase', async () => {
-          const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
-          assertEqual(tokensRemainingIcoAfter, 0);
-        });
-
-        it('tokens amount of client 1 after purchase', async () => {
-          const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
-          const bonusSum = (bonus1 + bonus1).toFixed(2); // time and value bonuses
-          const tokensAmount = weiEquivalentToRemainingTokensIco.div(tokenRateIco);
-          const client1PurchaseBonuses = tokensAmount.mul(parseFloat(bonusSum));
-          assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(tokensAmount).add(client1PurchaseBonuses).toNumber());
-        });
-        it('investor(client) 1 purchase value', async () => {
-          const investment1Value = (await this.crowdsale.investmentsIco(client1)).toNumber();
-          assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensIco.toNumber());
-        });
-      });
+      // describe('purchase more then remaining tokens:', () => {
+      //   // only with function like below in contract
+      //   // function dropTokensRemainingIcoToMinimum() public {
+      //   //   tokensRemainingPreIco = 0;
+      //   //   tokensRemainingIco = 5576 * (10 ** 18);
+      //   // }
+      //   before(async () => {
+      //     await defaultBefore();
+      //     await timeController.addSeconds(icoStartShift);
+      //     await this.crowdsale.dropTokensRemainingIcoToMinimum({ from: owner });
+      //     await this.crowdsale.compaignAllocationAndBonusRemainingTokens({ from: owner });
+      //     this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensIco.add(purchaseOneEth);
+      //     await this.crowdsale.sellTokensIco({
+      //       from: client1,
+      //       value: this.purchaseMoreThenRemaining,
+      //     });
+      //   });
+      //   it('client 1 balance decreased after purchase', async () => {
+      //     const client1BalanceAfter = ethBalance(client1).toNumber();
+      //     assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
+      //   });
+      //
+      //   it('withdrawal wallet 1 balance after purchase', async () => {
+      //     const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
+      //     this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal1Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal1BalanceAfter,
+      //       this.withdrawal1BalanceBefore
+      //         .add(this.client1Withdrawal1Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //
+      //   it('withdrawal wallet 2 balance after purchase', async () => {
+      //     const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
+      //     this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal2Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal2BalanceAfter,
+      //       this.withdrawal2BalanceBefore
+      //         .add(this.client1Withdrawal2Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('withdrawal wallet 3 balance after purchase', async () => {
+      //     const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
+      //     this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal3Percent);
+      //     assertEqualBigNumbers(
+      //       withdrawal3BalanceAfter,
+      //       this.withdrawal3BalanceBefore
+      //         .add(this.client1Withdrawal3Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('withdrawal wallet 4 balance after purchase', async () => {
+      //     const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
+      //     this.client1Withdrawal4Value = weiEquivalentToRemainingTokensIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
+      //     assertEqualBigNumbers(
+      //       withdrawal4BalanceAfter,
+      //       this.withdrawal4BalanceBefore
+      //         .add(this.client1Withdrawal4Value)
+      //         .toNumber(),
+      //     );
+      //   });
+      //   it('ICO tokens remaining after purchase', async () => {
+      //     const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
+      //     assertEqual(tokensRemainingIcoAfter, 0);
+      //   });
+      //
+      //   it('tokens amount of client 1 after purchase', async () => {
+      //     const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
+      //     const bonusSum = (bonus1 + bonus1).toFixed(2); // time and value bonuses
+      //     const tokensAmount = weiEquivalentToRemainingTokensIco.div(tokenRateIco);
+      //     const client1PurchaseBonuses = tokensAmount.mul(parseFloat(bonusSum));
+      //     assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(tokensAmount).add(client1PurchaseBonuses).toNumber());
+      //   });
+      //   it('investor(client) 1 purchase value', async () => {
+      //     const investment1Value = (await this.crowdsale.investmentsIco(client1)).toNumber();
+      //     assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensIco.toNumber());
+      //   });
+      // });
     });
   });
 });

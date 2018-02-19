@@ -17,7 +17,7 @@ interface tokenRecipient {
 
 
 contract MocrowCoin is BurnableToken, FreezableToken, Pausable {
-    string constant public name = "MOCROW COIN";
+    string constant public name = "MOCROW";
     string constant public symbol = "MCW";
     uint256 constant public decimals = 18;
 
@@ -28,11 +28,12 @@ contract MocrowCoin is BurnableToken, FreezableToken, Pausable {
     uint256 constant public TOTAL_SUPPLY_VALUE = 235294118 * (10 ** decimals);
 
     /**
-    * @dev Create MocrowCoin contract
+    * @dev Create MocrowCoin contract with reserves.
     * @param _foundersReserve The address of founders reserve.
     * @param _bountyProgramReserve The address of bounty program reserve.
+    * @param _platformOperationsReserve The address of platform operations reserve.
     */
-    function MocrowCoin(address _platformOperationsReserve, address _foundersReserve, address _bountyProgramReserve) public {
+    function MocrowCoin(address _foundersReserve, address _bountyProgramReserve, address _platformOperationsReserve) public {
         require(
             _platformOperationsReserve != address(0) &&
             _foundersReserve != address(0) &&

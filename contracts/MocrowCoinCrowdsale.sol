@@ -14,11 +14,11 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     uint256 constant public HARDCAP_TOKENS_ICO = 84000000 * (10 ** DECIMALS);
     uint256 constant public COMPAIGN_ALLOCATION_AND_BONUSES_TOKENS = 11725883 * (10 ** DECIMALS);
 
-    uint256 constant public TOKEN_RATE_PRE_ICO = 17934; // 0.00017934
-    uint256 constant public TOKEN_RATE_ICO = 35868; // 0.00035868
+    uint256 constant public TOKEN_RATE_PRE_ICO = 17934;
+    uint256 constant public TOKEN_RATE_ICO = 35868;
 
-    uint256 constant public MINIMAL_INVESTMENT = 0.1 ether; // 1 * (10 ** (DECIMALS - 1))
-    uint256 constant public MAXIMAL_INVESTMENT = 5 ether; // 13 * (10 ** DECIMALS)
+    uint256 constant public MINIMAL_INVESTMENT = 0.1 ether;
+    uint256 constant public MAXIMAL_INVESTMENT = 5 ether;
 
     uint256 constant public MINIMAL_TEN_PERCENT_BONUS_BY_VALUE = 3.5 ether;
     uint256 constant public MINIMAL_FIVE_PERCENT_BONUS_BY_VALUE = 2.5 ether;
@@ -102,6 +102,20 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         _;
     }
 
+    /**
+    * @dev Constructor for MocrowCoinCrowdsale contract.
+    * @dev Set the owner who can manage administrators, whitelist and token.
+    * @param _withdrawalWallet1 The first withdrawal wallet address.
+    * @param _withdrawalWallet2 The second withdrawal wallet address.
+    * @param _withdrawalWallet3 The third withdrawal wallet address.
+    * @param _withdrawalWallet4 The fourth withdrawal wallet address.
+    * @param _addressForPlatformOperations The address to which reserved tokens for platform operations will be transferred.
+    * @param _addressForFounders The address to which reserved tokens for founders will be transferred.
+    * @param _addressForBountyProgram The address to which reserved tokens for bounty program will be transferred.
+    * @param _addressForCampaignAllocation The address to which remaining tokens for campaign allocation will be transferred.
+    * @param _addressForUnsoldTokens The address to which unsold tokens will be transferred.
+    * @param _startTimePreIco The start time of the pre-ICO and crowdsale in general.
+    */
     function MocrowCoinCrowdsale(
         address _withdrawalWallet1,
         address _withdrawalWallet2,
@@ -140,14 +154,18 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         withdrawalWallet3 = _withdrawalWallet3;
         withdrawalWallet4 = _withdrawalWallet4;
 
-        token = new MocrowCoin(_addressForPlatformOperations, _addressForFounders, _addressForBountyProgram);
+        token = new MocrowCoin(_addressForFounders, _addressForBountyProgram, _addressForPlatformOperations);
         addressForCampaignAllocation = _addressForCampaignAllocation;
         addressForUnsoldTokens = _addressForUnsoldTokens;
-        //        whitelist.transferOwnership(msg.sender);
-        //        token.transferOwnership(msg.sender);
     }
 
 
+    /**
+    * @dev Change pre-ICO start time.
+    * @dev Only administrator or owner can change pre-ICO start time and only before pre-ICO period.
+    * @dev The end time must be less than start time of ICO.
+    * @param _startTimePreIco The start time which must be more than now time.
+    */
     function changePreIcoStartTime(uint256 _startTimePreIco) onlyAdministratorOrOwner beforePreIcoSalePeriod public {
         require(now < _startTimePreIco);
         uint256 _endTimePreIco = _startTimePreIco + (preIcoDurationDays * 1 days);
@@ -157,6 +175,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         endTimePreIco = _endTimePreIco;
     }
 
+    /**
+    * @dev Change ICO start time.
+    * @dev Only administrator or owner can change ICO start time and only before ICO period.
+    * @dev The end time must be less than start time of ICO.
+    * @param _startTimeIco The start time which must be more than end time of the pre-ICO and more than now time.
+    */
     function changeIcoStartTime(uint256 _startTimeIco) onlyAdministratorOrOwner beforeIcoSalePeriod public {
         require(_startTimeIco > now && _startTimeIco > endTimePreIco);
 
@@ -164,6 +188,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         endTimeIco = startTimeIco + (icoDurationDays * 1 days);
     }
 
+    /**
+    * @dev Change pre-ICO token rate.
+    * @dev Only administrator or owner can change pre-ICO token rate and only once per day.
+    * @param _preIcoTokenRate Pre-ICO rate of the token.
+    * @param _negativeDecimals Number of decimals after comma.
+    */
     function changePreIcoTokenRate(uint256 _preIcoTokenRate, uint256 _negativeDecimals) onlyAdministratorOrOwner public {
         uint256 dayNumber = now / (1 days);
         require(dayNumber != lastDayChangePreIcoTokenRate);
@@ -173,6 +203,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         lastDayChangePreIcoTokenRate = dayNumber;
     }
 
+    /**
+    * @dev Change ICO token rate.
+    * @dev Only administrator or owner can change pre-ICO token rate and only once per day.
+    * @param _icoTokenRate ICO rate of the token.
+    * @param _negativeDecimals Number of decimals after comma.
+    */
     function changeIcoTokenRate(uint256 _icoTokenRate, uint256 _negativeDecimals) onlyAdministratorOrOwner public {
         uint256 dayNumber = now / (1 days);
         require(dayNumber != lastDayChangeIcoTokenRate);
@@ -183,7 +219,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     }
 
     /**
-    * @dev called by the owner or administrator to pause, triggers stopped state
+    * @dev Called by the owner or administrator to pause, triggers stopped state
     */
     function pause() onlyAdministratorOrOwner whenNotPaused public {
         paused = true;
@@ -191,13 +227,16 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     }
 
     /**
-    * @dev called by the owner or administrator to unpause, returns to normal state
+    * @dev Called by the owner or administrator to unpause, returns to normal state
     */
     function unpause() onlyAdministratorOrOwner whenPaused public {
         paused = false;
         Unpause();
     }
 
+    /**
+    * @dev Transfer to withdrawal wallets with considering of percentage.
+    */
     function withdrawalWalletsTransfer(uint256 value) private {
         uint256 withdrawalWallet1Value = withdrawalWallet1Percent.mul(value).div(100);
         uint256 withdrawalWallet2Value = withdrawalWallet2Percent.mul(value).div(100);
@@ -209,24 +248,9 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         withdrawalWallet4.transfer(withdrawalWallet4Value);
     }
 
-//    function dropTokensRemaining() public {
-//        tokensRemainingPreIco = 0;
-//        tokensRemainingIco = 0;
-//    }
-//
-//    function dropTokensRemainingPreIcoToMinimum() public {
-//        tokensRemainingPreIco = 11152 * (10 ** 18);
-//        tokensRemainingIco = HARDCAP_TOKENS_ICO + tokensRemainingPreIco;
-//    }
-//
-//    function dropTokensRemainingIcoToMinimum() public {
-//        tokensRemainingPreIco = 0;
-//        tokensRemainingIco = 5576 * (10 ** 18);
-//    }
-
     /**
     * @dev Sell tokens during pre-ICO.
-    * @dev Sell tokens only for whitelisted wallets.
+    * @dev Sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensPreIco() preIcoSalePeriod whenWhitelisted whenNotPaused minimalInvestment public payable {
         require(tokensRemainingPreIco > 0);
@@ -260,7 +284,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
 
     /**
     * @dev Sell tokens during ICO.
-    * @dev Sell tokens only for whitelisted wallets.
+    * @dev Sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensIco() icoSalePeriod whenWhitelisted whenNotPaused minimalInvestment public payable {
         require(tokensRemainingIco > 0);
@@ -321,6 +345,10 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         }
     }
 
+    /**
+    * @dev Transfer remaining compaign allocation and bonus tokens.
+    * @dev Transfer tokens only for administrators or owner and only after ICO period.
+    */
     function transferRemainingCompaignAllocationAndBonusTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
         require(!isRemainingCompaignAllocationAndBonusTokensTransfered);
         token.transfer(addressForCampaignAllocation, compaignAllocationAndBonusRemainingTokens);
@@ -331,6 +359,10 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
         }
     }
 
+    /**
+    * @dev Transfer unsold tokens.
+    * @dev Transfer tokens only for administrators or owner and only after ICO period.
+    */
     function transferUnsoldTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
         require(!isUnsoldTokensTransfered);
         token.transfer(addressForUnsoldTokens, tokensRemainingIco);

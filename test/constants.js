@@ -11,9 +11,14 @@ export const reservedTokensForBountyProgram = ether(9480000);
 export const validAmountForBountyProgram = reservedTokensForBountyProgram.div(div);
 export const invalidAmountForBountyProgram = reservedTokensForBountyProgram.add(ether1);
 
+export const reservedTokensForPlatformOperations = ether(70588235);
+
 export const totalSupply = ether(235294118);
 
-export const ownerBalance = totalSupply.sub(reservedTokensForFounders).sub(reservedTokensForBountyProgram);
+export const ownerBalance = totalSupply
+  .sub(reservedTokensForFounders)
+  .sub(reservedTokensForBountyProgram)
+  .sub(reservedTokensForPlatformOperations);
 export const validAmountForOwner = ownerBalance.div(div);
 export const invalidAmountForOwner = ownerBalance.add(ether1);
 
