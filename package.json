@@ -1,7 +1,7 @@
 {
-  "name": "powercoin-smart-contract",
+  "name": "mocrowcoin-smart-contract",
   "version": "1.0.0",
-  "description": "PowerCoin token",
+  "description": "MocrowCoin",
   "license": "MIT",
   "scripts": {
     "lint": "npm run eslint && npm run solium",
@@ -11,30 +11,30 @@
     "test": "truffle test",
     "truffle": "truffle",
     "compile": "rm -rf ./build && truffle compile",
-    "flatten": "npm i && truffle-flattener contracts/MocrowCoin.sol >> contracts/Flattened.sol"
+    "flatten": "rm -rf contracts/Flattened.sol && truffle-flattener contracts/MocrowCoinCrowdsale.sol >> contracts/Flattened.sol"
   },
   "dependencies": {
-    "zeppelin-solidity": "^1.3.0"
+    "zeppelin-solidity": "^1.7.0"
   },
   "devDependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
-    "bignumber.js": "^4.1.0",
+    "bignumber.js": "^6.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "chai-bignumber": "^2.0.1",
-    "eslint": "^4.9.0",
+    "chai-bignumber": "^2.0.2",
+    "eslint": "^4.18.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.4.0",
-    "lodash": "^4.17.4",
-    "solidity-coverage": "^0.2.7",
-    "solium": "^1.0.4",
-    "truffle": "^4.0.1",
-    "truffle-flattener": "^1.2.0"
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "lodash": "^4.17.5",
+    "solidity-coverage": "^0.4.9",
+    "solium": "^1.1.5",
+    "truffle": "^4.0.6",
+    "truffle-flattener": "^1.2.3",
+    "ethereumjs-testrpc-sc": "^6.0.7"
   }
 }

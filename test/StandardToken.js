@@ -5,12 +5,17 @@ import {
   validAmountForOwner,
   invalidAmountForOwner,
   getDefaultWallets,
-} from './constants';
+} from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 
 contract('MocrowCoin', (wallets) => {
-  const { owner, founders, bountyProgram, client3 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    client3,
+  } = getDefaultWallets(wallets);
   const allowAmountForOwner = validAmountForOwner.div(2);
   const allowableAmountForOwner = allowAmountForOwner.div(2);
 
@@ -39,7 +44,10 @@ contract('MocrowCoin', (wallets) => {
       await this.token.decreaseApproval(bountyProgram, allowableAmountForOwner, { from: owner });
 
       const bountyProgramAllowance = (await this.token.allowance(owner, bountyProgram)).toNumber();
-      assertEqual(bountyProgramAllowance, allowAmountForOwner.sub(allowableAmountForOwner).toNumber());
+      assertEqual(
+        bountyProgramAllowance,
+        allowAmountForOwner.sub(allowableAmountForOwner).toNumber(),
+      );
     });
 
     it('should decrease allowed amount of tokens to 0 for a spender if sender uses too much value while decrease', async function () {
@@ -61,10 +69,16 @@ contract('MocrowCoin', (wallets) => {
       assertEqual(actualOwnerBalance, ownerBalance.sub(allowableAmountForOwner).toNumber());
 
       const foundersBalance = (await this.token.balanceOf(founders)).toNumber();
-      assertEqual(foundersBalance, reservedTokensForFounders.add(allowableAmountForOwner).toNumber());
+      assertEqual(
+        foundersBalance,
+        reservedTokensForFounders.add(allowableAmountForOwner).toNumber(),
+      );
 
       const bountyProgramAllowance = (await this.token.allowance(owner, bountyProgram)).toNumber();
-      assertEqual(bountyProgramAllowance, allowAmountForOwner.sub(allowableAmountForOwner).toNumber());
+      assertEqual(
+        bountyProgramAllowance,
+        allowAmountForOwner.sub(allowableAmountForOwner).toNumber(),
+      );
     });
 
     it('should not transfer tokens from one account to another if token holder does not have enough tokens', async function () {
@@ -108,7 +122,8 @@ contract('MocrowCoin', (wallets) => {
     });
 
     it('should not transfer tokens from one account to another if sender uses 0x0 address as destination account', async function () {
-      const transferFrom = this.token.transferFrom(owner, 0x0, allowableAmountForOwner, { from: bountyProgram });
+      const transferFrom =
+        this.token.transferFrom(owner, 0x0, allowableAmountForOwner, { from: bountyProgram });
 
       await transferFrom.should.be.rejectedWith(EVMThrow);
 

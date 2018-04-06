@@ -7,12 +7,17 @@ import {
   totalSupply,
   ownerBalance,
   getDefaultWallets,
-} from './constants';
+} from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 
 contract('MocrowCoin', (wallets) => {
-  const { owner, founders, bountyProgram, client3 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    client3,
+  } = getDefaultWallets(wallets);
 
   beforeEach(async function () {
     // given
@@ -33,14 +38,10 @@ contract('MocrowCoin', (wallets) => {
     });
 
     it('should increase bounty program account balance after deploy', async function () {
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(actualReservedTokensForBountyProgram, reservedTokensForBountyProgram.toNumber());
     });
-
-    // it('should increase platform operations account balance after deploy', async function () {
-    //   const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
-    //   assertEqual(actualReservedTokensForBountyProgram, reservedTokensForBountyProgram.toNumber());
-    // });
 
     it('should provide correct total supply', async function () {
       const actualTotalSupply = (await this.token.totalSupply()).toNumber();
@@ -54,7 +55,10 @@ contract('MocrowCoin', (wallets) => {
       assertEqual(actualOwnerBalance, ownerBalance.sub(validAmountForFounders).toNumber());
 
       const actualReservedTokensForFounders = (await this.token.balanceOf(founders)).toNumber();
-      assertEqual(actualReservedTokensForFounders, reservedTokensForFounders.add(validAmountForFounders).toNumber());
+      assertEqual(
+        actualReservedTokensForFounders,
+        reservedTokensForFounders.add(validAmountForFounders).toNumber(),
+      );
     });
 
     it('should not transfer tokens to 0x0 address', async function () {

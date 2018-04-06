@@ -1,19 +1,20 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.19;
 
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /**
  * @title Administrable
  * @dev The Administrable contract has an owner and administrators addresses
  */
 contract Administrable is Ownable {
-    mapping(address => bool) internal administrators;
+    mapping(address => bool) private administrators;
     uint256 public administratorsLength = 0;
     /**
      * @dev The Administrable constructor sets the original `owner` of the contract to the sender
      * account and 3 admins.
      */
-    function Administrable() {
+    function Administrable() public {
         owner = msg.sender;
     }
 
@@ -26,7 +27,7 @@ contract Administrable is Ownable {
     }
 
     function addAdministrator(address _admin) onlyOwner public {
-        require(administratorsLength <= 3);
+        require(administratorsLength < 3);
         require(!administrators[_admin]);
         require(_admin != address(0) && _admin != owner);
         administrators[_admin] = true;

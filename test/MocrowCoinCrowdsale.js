@@ -2,25 +2,17 @@ import {
   EVMThrow,
   assertEqual,
   assertTrue,
-  assertFalse,
   ether,
-  oneEther,
   ethBalance,
   timeController,
-  transaction,
   assertExpectedError,
   assertEqualBigNumbers,
 } from './utils';
 import {
-  reservedTokensForFounders,
-  validAmountForFounders,
-  reservedTokensForBountyProgram,
-  ownerBalance,
-  totalSupply,
   compaignAllocationAndBonusesTokens,
   tokensRemainingIco,
   getDefaultWallets,
-} from './constants';
+} from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 const MocrowCoinCrowdsale = artifacts.require('MocrowCoinCrowdsale');
@@ -28,7 +20,7 @@ const Whitelist = artifacts.require('Whitelist');
 
 // Commented tests work only with some functions,
 // which must be included into contract in dev mode, BUT NOT IN PRODUCTION!
-contract('MocrowCoinCrowdsale', function (wallets) {
+contract('MocrowCoinCrowdsale', (wallets) => {
   const {
     owner,
     founders,
@@ -41,9 +33,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     client2,
     client3,
   } = getDefaultWallets(wallets);
-
-  const tokensRemainingPreIcoAfterDrop = ether(11152);
-  const tokensRemainingIcoAfterDrop = ether(5576);
 
   const oneDayInSeconds = 24 * 60 * 60;
   const preIcoStartShift = 1000;
@@ -89,9 +78,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
   const minimalFivePercentBonusByValue = ether(2.5);
   const minimalTenPercentBonusByValue = ether(3.5);
 
-  const weiEquivalentToRemainingTokensPreIco = tokensRemainingPreIcoAfterDrop.mul(tokenRatePreIco);
-  const weiEquivalentToRemainingTokensIco = tokensRemainingIcoAfterDrop.mul(tokenRateIco);
-
   const getDefaultPreIcoDates = () => {
     const startTimePreIco = timeController.currentTimestamp().add(preIcoStartShift).toNumber();
     const endTimePreIco = timeController.currentTimestamp().add(preIcoEnd).toNumber();
@@ -100,7 +86,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
 
   const getPastTime = () => timeController.currentTimestamp().sub(100).toNumber();
 
-  const getDays = () => Math.floor(timeController.currentTimestamp().div(oneDayInSeconds).toNumber());
+  const getDays = () =>
+    Math.floor(timeController.currentTimestamp().div(oneDayInSeconds).toNumber());
 
   const getDefaultIcoDates = () => {
     const startTimeIco = timeController.currentTimestamp().add(icoStartShift).toNumber();
@@ -152,36 +139,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       assertEqual(ownerToken, this.crowdsale.address);
     });
 
-    // it('address for campaign allocation', async () => {
-    //   const actualTokenRateIco = await this.crowdsale.addressForCampaignAllocation();
-    //   assertEqual(actualTokenRateIco, founders);
-    // });
-    //
-    // it('address for unsold tokens', async () => {
-    //   const actualTokenRateIco = await this.crowdsale.addressForUnsoldTokens();
-    //   assertEqual(actualTokenRateIco, bountyProgram);
-    // });
-    //
-    // it('withdrawal wallet 1', async () => {
-    //   const actualWithdrawal1 = await this.crowdsale.withdrawalWallet1();
-    //   assertEqual(actualWithdrawal1, withdrawal1);
-    // });
-    //
-    // it('withdrawal wallet 2', async () => {
-    //   const actualWithdrawal2 = await this.crowdsale.withdrawalWallet2();
-    //   assertEqual(actualWithdrawal2, withdrawal2);
-    // });
-    //
-    // it('withdrawal wallet 3', async () => {
-    //   const actualWithdrawal3 = await this.crowdsale.withdrawalWallet3();
-    //   assertEqual(actualWithdrawal3, withdrawal3);
-    // });
-    //
-    // it('withdrawal wallet 4', async () => {
-    //   const actualWithdrawal4 = await this.crowdsale.withdrawalWallet4();
-    //   assertEqual(actualWithdrawal4, withdrawal4);
-    // });
-
     it('start time pre-ICO', async () => {
       const actualStartTimePreIco = (await this.crowdsale.startTimePreIco()).toNumber();
       assertEqual(actualStartTimePreIco, startTimePreIco);
@@ -223,12 +180,14 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     });
 
     it('pre-ICO token rate negative decimals', async () => {
-      const actualPreIcoTokenRateNegativeDecimals = (await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
+      const actualPreIcoTokenRateNegativeDecimals = (
+        await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualPreIcoTokenRateNegativeDecimals, preIcoTokenRateNegativeDecimals);
     });
 
     it('ICO token rate negative decimals', async () => {
-      const actualIcoTokenRateNegativeDecimals = (await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
+      const actualIcoTokenRateNegativeDecimals = (
+        await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualIcoTokenRateNegativeDecimals, icoTokenRateNegativeDecimals);
     });
 
@@ -258,24 +217,28 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     });
 
     it('minimal 10 percent bonus by value', async () => {
-      const actualMinimalTenPercentBonusByValue = (await this.crowdsale.MINIMAL_TEN_PERCENT_BONUS_BY_VALUE()).toNumber();
+      const actualMinimalTenPercentBonusByValue = (
+        await this.crowdsale.MINIMAL_TEN_PERCENT_BONUS_BY_VALUE()).toNumber();
       assertEqual(actualMinimalTenPercentBonusByValue, minimalTenPercentBonusByValue.toNumber());
     });
 
     it('minimal 5 percent bonus by value', async () => {
-      const actualMinimalFivePercentBonusByValue = (await this.crowdsale.MINIMAL_FIVE_PERCENT_BONUS_BY_VALUE()).toNumber();
+      const actualMinimalFivePercentBonusByValue = (
+        await this.crowdsale.MINIMAL_FIVE_PERCENT_BONUS_BY_VALUE()).toNumber();
       assertEqual(actualMinimalFivePercentBonusByValue, minimalFivePercentBonusByValue.toNumber());
     });
 
     it('ico 10 percent bonus ended', async () => {
       const icoTenPercentBonusEnded = startTimeIco + (2 * oneDayInSeconds);
-      const actualIcoTenPercentBonusEnded = (await this.crowdsale.icoTenPercentBonusEnded()).toNumber();
+      const actualIcoTenPercentBonusEnded = (
+        await this.crowdsale.icoTenPercentBonusEnded()).toNumber();
       assertEqual(actualIcoTenPercentBonusEnded, icoTenPercentBonusEnded);
     });
 
     it('ico 5 percent bonus ended', async () => {
       const icoFivePercentBonusEnded = startTimeIco + (5 * oneDayInSeconds);
-      const actualIcoFivePercentBonusEnded = (await this.crowdsale.icoFivePercentBonusEnded()).toNumber();
+      const actualIcoFivePercentBonusEnded = (
+        await this.crowdsale.icoFivePercentBonusEnded()).toNumber();
       assertEqual(actualIcoFivePercentBonusEnded, icoFivePercentBonusEnded);
     });
 
@@ -299,18 +262,19 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       assertEqual(withdrawalWallet4Percent, withdrawal4Percent);
     });
   });
-  describe('#MocrowCoinCrowdsale() - constructor', function () {
+  describe('#MocrowCoinCrowdsale() - constructor', () => {
     describe('wrong parameters:', () => {
       const { startTimePreIco } = getDefaultPreIcoDates();
-      it('empty parameters', async () => {
-        await assertExpectedError(MocrowCoinCrowdsale.new());
-      });
+
       it('withdrawal wallet 1 0x0', async () => {
         await assertExpectedError(MocrowCoinCrowdsale.new(
           0x0,
           withdrawal2,
           withdrawal3,
           withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
           founders,
           bountyProgram,
           startTimePreIco,
@@ -322,6 +286,9 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           0x0,
           withdrawal3,
           withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
           founders,
           bountyProgram,
           startTimePreIco,
@@ -333,6 +300,9 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           0x0,
           withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
           founders,
           bountyProgram,
           startTimePreIco,
@@ -344,6 +314,23 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           withdrawal3,
           0x0,
+          client3,
+          founders,
+          bountyProgram,
+          founders,
+          bountyProgram,
+          startTimePreIco,
+        ));
+      });
+      it('platform operations wallet 0x0', async () => {
+        await assertExpectedError(MocrowCoinCrowdsale.new(
+          withdrawal1,
+          withdrawal2,
+          withdrawal3,
+          withdrawal4,
+          0x0,
+          founders,
+          bountyProgram,
           founders,
           bountyProgram,
           startTimePreIco,
@@ -355,7 +342,10 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           withdrawal3,
           withdrawal4,
+          client3,
           0x0,
+          bountyProgram,
+          founders,
           bountyProgram,
           startTimePreIco,
         ));
@@ -366,6 +356,37 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           withdrawal3,
           withdrawal4,
+          client3,
+          founders,
+          0x0,
+          founders,
+          bountyProgram,
+          startTimePreIco,
+        ));
+      });
+      it('campaign allocation wallet 0x0', async () => {
+        await assertExpectedError(MocrowCoinCrowdsale.new(
+          withdrawal1,
+          withdrawal2,
+          withdrawal3,
+          withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
+          0x0,
+          bountyProgram,
+          startTimePreIco,
+        ));
+      });
+      it('unsold tokens wallet 0x0', async () => {
+        await assertExpectedError(MocrowCoinCrowdsale.new(
+          withdrawal1,
+          withdrawal2,
+          withdrawal3,
+          withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
           founders,
           0x0,
           startTimePreIco,
@@ -377,8 +398,12 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           withdrawal3,
           withdrawal4,
+          client3,
           founders,
           bountyProgram,
+          founders,
+          bountyProgram,
+          0x0,
         ));
       });
       it('startTimePreIco < now', async () => {
@@ -387,6 +412,9 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           withdrawal2,
           withdrawal3,
           withdrawal4,
+          client3,
+          founders,
+          bountyProgram,
           founders,
           bountyProgram,
           getPastTime(),
@@ -426,23 +454,30 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
       });
       it('_startTimePreIco < now', async () => {
-        const changePreIcoStartTime = this.crowdsale.changePreIcoStartTime(getPastTime(), { from: owner });
+        const changePreIcoStartTime =
+          this.crowdsale.changePreIcoStartTime(getPastTime(), { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('not owner or administrator', async () => {
-        const changePreIcoStartTime = this.crowdsale.changePreIcoStartTime(this.startTimePreIco + oneDayInSeconds, { from: client1 });
+        const duringPreIco = this.startTimePreIco + oneDayInSeconds;
+        const changePreIcoStartTime =
+          this.crowdsale.changePreIcoStartTime(duringPreIco, { from: client1 });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('not before pre-ICO sale period', async () => {
+        const duringPreIco = this.startTimePreIco + oneDayInSeconds;
         await timeController.addSeconds(preIcoStartShift); // preICO was already started
-        const changePreIcoStartTime = this.crowdsale.changePreIcoStartTime(this.startTimePreIco + oneDayInSeconds, { from: owner });
+        const changePreIcoStartTime =
+          this.crowdsale.changePreIcoStartTime(duringPreIco, { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('_endTimePreIco >= startTimeIco', async () => {
-        const changePreIcoStartTime = this.crowdsale.changePreIcoStartTime(this.endTimePreIco + delayAfterPreIco, { from: owner });
+        const afterPreIco = this.endTimePreIco + delayAfterPreIco;
+        const changePreIcoStartTime =
+          this.crowdsale.changePreIcoStartTime(afterPreIco, { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
@@ -494,23 +529,27 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
       });
       it('_startTimeIco < now', async () => {
-        const changePreIcoStartTime = this.crowdsale.changeIcoStartTime(getPastTime(), { from: owner });
+        const changePreIcoStartTime =
+          this.crowdsale.changeIcoStartTime(getPastTime(), { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('_startTimeIco < endTimePreIco', async () => {
-        const changePreIcoStartTime = this.crowdsale.changeIcoStartTime(this.endTimePreIco - oneDayInSeconds, { from: owner });
+        const changePreIcoStartTime =
+          this.crowdsale.changeIcoStartTime(this.endTimePreIco - oneDayInSeconds, { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('not owner or administrator', async () => {
-        const changePreIcoStartTime = this.crowdsale.changeIcoStartTime(this.startTimeIco + oneDayInSeconds, { from: client1 });
+        const changePreIcoStartTime =
+          this.crowdsale.changeIcoStartTime(this.startTimeIco + oneDayInSeconds, { from: client1 });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
       it('not before ICO sale period', async () => {
         await timeController.addSeconds(icoStartShift); // ICO was already started
-        const changePreIcoStartTime = this.crowdsale.changeIcoStartTime(this.startTimeIco + oneDayInSeconds, { from: owner });
+        const changePreIcoStartTime =
+          this.crowdsale.changeIcoStartTime(this.startTimeIco + oneDayInSeconds, { from: owner });
         await changePreIcoStartTime.should.be.rejectedWith(EVMThrow);
         await this.timeWasntChanged();
       });
@@ -540,10 +579,12 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       const actualPreIcoTokenRate = (await this.crowdsale.preIcoTokenRate()).toNumber();
       assertEqual(actualPreIcoTokenRate, newTokenRate);
 
-      const actualPreIcoTokenRateNegativeDecimals = (await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
+      const actualPreIcoTokenRateNegativeDecimals = (
+        await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualPreIcoTokenRateNegativeDecimals, newNegativeDecimals);
 
-      const actualLastDayChangePreIcoTokenRate = (await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
+      const actualLastDayChangePreIcoTokenRate = (
+        await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
       assertEqual(actualLastDayChangePreIcoTokenRate, getDays());
     };
     before(async () => {
@@ -566,28 +607,52 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         const actualPreIcoTokenRate = (await this.crowdsale.preIcoTokenRate()).toNumber();
         assertEqual(actualPreIcoTokenRate, newTokenRate || this.preIcoTokenRate);
 
-        const actualPreIcoTokenRateNegativeDecimals = (await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
-        assertEqual(actualPreIcoTokenRateNegativeDecimals, newNegativeDecimals || this.preIcoTokenRateNegativeDecimals);
+        const actualPreIcoTokenRateNegativeDecimals = (
+          await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
+        assertEqual(
+          actualPreIcoTokenRateNegativeDecimals,
+          newNegativeDecimals || this.preIcoTokenRateNegativeDecimals,
+        );
 
-        const actualLastDayChangePreIcoTokenRate = (await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
-        assertEqual(actualLastDayChangePreIcoTokenRate, newLastDay || this.lastDayChangePreIcoTokenRate);
+        const actualLastDayChangePreIcoTokenRate = (
+          await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
+        assertEqual(
+          actualLastDayChangePreIcoTokenRate,
+          newLastDay || this.lastDayChangePreIcoTokenRate,
+        );
       };
       before(async () => {
-        this.lastDayChangePreIcoTokenRate = (await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
+        this.lastDayChangePreIcoTokenRate = (
+          await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
         this.preIcoTokenRate = (await this.crowdsale.preIcoTokenRate()).toNumber();
-        this.preIcoTokenRateNegativeDecimals = (await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
+        this.preIcoTokenRateNegativeDecimals = (
+          await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
       });
       it('not owner or administrator', async () => {
-        const changePreIcoTokenRate = this.crowdsale.changePreIcoTokenRate(newTokenRate1, newNegativeDecimals1, { from: client2 });
+        const changePreIcoTokenRate =
+          this.crowdsale.changePreIcoTokenRate(
+            newTokenRate1,
+            newNegativeDecimals1,
+            { from: client2 },
+          );
         await changePreIcoTokenRate.should.be.rejectedWith(EVMThrow);
         await tokenRateWasntChanged();
       });
       it('two changes token rate pre-ICO in one day', async () => {
-        await this.crowdsale.changePreIcoTokenRate(newTokenRate1, newNegativeDecimals1, { from: owner });
+        await this.crowdsale.changePreIcoTokenRate(
+          newTokenRate1,
+          newNegativeDecimals1,
+          { from: owner },
+        );
         await positiveResult(newTokenRate1, newNegativeDecimals1);
         const newLastDay = (await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
 
-        const changePreIcoTokenRate = this.crowdsale.changePreIcoTokenRate(newTokenRate2, newNegativeDecimals2, { from: owner });
+        const changePreIcoTokenRate =
+          this.crowdsale.changePreIcoTokenRate(
+            newTokenRate2,
+            newNegativeDecimals2,
+            { from: owner },
+          );
         await changePreIcoTokenRate.should.be.rejectedWith(EVMThrow);
         await tokenRateWasntChanged(newTokenRate1, newNegativeDecimals1, newLastDay);
       });
@@ -598,7 +663,11 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       });
       it('changed token rate & negative decimals & last day of change rate in the next day after last change', async () => {
         await timeController.addSeconds(oneDayInSeconds);
-        await this.crowdsale.changePreIcoTokenRate(newTokenRate2, newNegativeDecimals2, { from: client1 });
+        await this.crowdsale.changePreIcoTokenRate(
+          newTokenRate2,
+          newNegativeDecimals2,
+          { from: client1 },
+        );
         await positiveResult(newTokenRate2, newNegativeDecimals2);
       });
     });
@@ -613,10 +682,12 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       const actualIcoTokenRate = (await this.crowdsale.icoTokenRate()).toNumber();
       assertEqual(actualIcoTokenRate, newTokenRate);
 
-      const actualIcoTokenRateNegativeDecimals = (await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
+      const actualIcoTokenRateNegativeDecimals = (
+        await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualIcoTokenRateNegativeDecimals, newNegativeDecimals);
 
-      const actualLastDayChangeIcoTokenRate = (await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
+      const actualLastDayChangeIcoTokenRate = (
+        await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
       assertEqual(actualLastDayChangeIcoTokenRate, getDays());
     };
     before(async () => {
@@ -639,28 +710,41 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         const actualIcoTokenRate = (await this.crowdsale.icoTokenRate()).toNumber();
         assertEqual(actualIcoTokenRate, newTokenRate || this.icoTokenRate);
 
-        const actualIcoTokenRateNegativeDecimals = (await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
-        assertEqual(actualIcoTokenRateNegativeDecimals, newNegativeDecimals || this.icoTokenRateNegativeDecimals);
+        const actualIcoTokenRateNegativeDecimals = (
+          await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
+        assertEqual(
+          actualIcoTokenRateNegativeDecimals,
+          newNegativeDecimals || this.icoTokenRateNegativeDecimals,
+        );
 
-        const actualLastDayChangeIcoTokenRate = (await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
+        const actualLastDayChangeIcoTokenRate = (
+          await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
         assertEqual(actualLastDayChangeIcoTokenRate, newLastDay || this.lastDayChangeIcoTokenRate);
       };
       before(async () => {
-        this.lastDayChangeIcoTokenRate = (await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
+        this.lastDayChangeIcoTokenRate = (
+          await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
         this.icoTokenRate = (await this.crowdsale.icoTokenRate()).toNumber();
-        this.icoTokenRateNegativeDecimals = (await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
+        this.icoTokenRateNegativeDecimals = (
+          await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
       });
       it('not owner or administrator', async () => {
-        const changeIcoTokenRate = this.crowdsale.changeIcoTokenRate(newTokenRate1, newNegativeDecimals1, { from: client2 });
+        const changeIcoTokenRate =
+          this.crowdsale.changeIcoTokenRate(newTokenRate1, newNegativeDecimals1, { from: client2 });
         await changeIcoTokenRate.should.be.rejectedWith(EVMThrow);
         await tokenRateWasntChanged();
       });
       it('two changes token rate ICO in one day', async () => {
-        await this.crowdsale.changeIcoTokenRate(newTokenRate1, newNegativeDecimals1, { from: owner });
+        await this.crowdsale.changeIcoTokenRate(
+          newTokenRate1,
+          newNegativeDecimals1,
+          { from: owner },
+        );
         await positiveResult(newTokenRate1, newNegativeDecimals1);
         const newLastDay = (await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
 
-        const changeIcoTokenRate = this.crowdsale.changeIcoTokenRate(newTokenRate2, newNegativeDecimals2, { from: owner });
+        const changeIcoTokenRate =
+          this.crowdsale.changeIcoTokenRate(newTokenRate2, newNegativeDecimals2, { from: owner });
         await changeIcoTokenRate.should.be.rejectedWith(EVMThrow);
         await tokenRateWasntChanged(newTokenRate1, newNegativeDecimals1, newLastDay);
       });
@@ -671,7 +755,11 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       });
       it('changed token rate & negative decimals & last day of change rate in the next day after last change', async () => {
         await timeController.addSeconds(oneDayInSeconds);
-        await this.crowdsale.changeIcoTokenRate(newTokenRate2, newNegativeDecimals2, { from: client1 });
+        await this.crowdsale.changeIcoTokenRate(
+          newTokenRate2,
+          newNegativeDecimals2,
+          { from: client1 },
+        );
         await positiveResult(newTokenRate2, newNegativeDecimals2);
       });
     });
@@ -720,7 +808,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     describe('wrong parameters:', () => {
       const nothingWasChanged = () => {
         it('tokensRemainingPreIco wasn\'t changed', async () => {
-          const newTokensRemainingPreIcoAfter = (await this.crowdsale.tokensRemainingPreIco()).toNumber();
+          const newTokensRemainingPreIcoAfter = (
+            await this.crowdsale.tokensRemainingPreIco()).toNumber();
           assertEqual(newTokensRemainingPreIcoAfter, this.tokensRemainingPreIcoBefore.toNumber());
         });
         it('tokensRemainingIco wasn\'t changed', async () => {
@@ -744,15 +833,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(newWithdrawal4BalanceAfter, this.withdrawal4BalanceBefore.toNumber());
         });
 
-        // it('client1 balance wasn\'t changed', async () => {
-        //   const newClient1BalanceAfter = ethBalance(client1).toNumber();
-        //   assertEqual(newClient1BalanceAfter, this.client1BalanceBefore.toNumber());
-        // });
-        // it('client2 balance wasn\'t changed', async () => {
-        //   const newClient2BalanceAfter = ethBalance(client2).toNumber();
-        //   assertEqual(newClient2BalanceAfter, this.client2BalanceBefore.toNumber());
-        // });
-
         it('tokens of client1 wasn\'t changed', async () => {
           const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
           assertEqual(newClient1TokensAfter, this.client1TokensBefore.toNumber());
@@ -762,11 +842,13 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(newClient2TokensAfter, this.client2TokensBefore.toNumber());
         });
         it('investments of client1 wasn\'t changed', async () => {
-          const newClient1InvestentAmountAfter = (await this.crowdsale.investmentsPreIco(client1)).toNumber();
+          const newClient1InvestentAmountAfter = (
+            await this.crowdsale.investmentsPreIco(client1)).toNumber();
           assertEqual(newClient1InvestentAmountAfter, this.client1InvestentAmountBefore.toNumber());
         });
         it('investments of client2 wasn\'t changed', async () => {
-          const newClient2InvestentAmountAfter = (await this.crowdsale.investmentsPreIco(client2)).toNumber();
+          const newClient2InvestentAmountAfter = (
+            await this.crowdsale.investmentsPreIco(client2)).toNumber();
           assertEqual(newClient2InvestentAmountAfter, this.client2InvestentAmountBefore.toNumber());
         });
       };
@@ -785,7 +867,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         describe('after', () => {
           before(async () => {
             await timeController.addSeconds(preIcoEnd);
-            const sellTokensPreIco = this.crowdsale.sellTokensPreIco({ from: client2, value: purchaseOneEth });
+            const sellTokensPreIco =
+              this.crowdsale.sellTokensPreIco({ from: client2, value: purchaseOneEth });
             await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
           });
           nothingWasChanged();
@@ -829,27 +912,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         nothingWasChanged();
       });
-      // describe('tokensRemainingPreIco == 0:', () => {
-      // // only with function like below in contract;
-      // //
-      // // function dropTokensRemaining() public {
-      // //   tokensRemainingPreIco = 0;
-      // //   tokensRemainingIco = 0;
-      // // }
-      //   before(async () => {
-      //     await defaultBefore();
-      //     await timeController.addSeconds(preIcoStartShift);
-      //     await this.crowdsale.dropTokensRemaining();
-      //     this.tokensRemainingPreIcoBefore = ether(0);
-      //     this.tokensRemainingIcoBefore = ether(0);
-      //     const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
-      //       from: client1,
-      //       value: minimalInvestment,
-      //     });
-      //     await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
-      //   });
-      //   nothingWasChanged();
-      // });
     });
     describe('right parameters:', () => {
       describe('common requests:', () => {
@@ -857,7 +919,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           await defaultBefore();
           await timeController.addSeconds(preIcoStartShift);
           this.preIcoTokenRate = await this.crowdsale.preIcoTokenRate();
-          this.preIcoTokenRateNegativeDecimals = await this.crowdsale.preIcoTokenRateNegativeDecimals();
+          this.preIcoTokenRateNegativeDecimals =
+            await this.crowdsale.preIcoTokenRateNegativeDecimals();
           await this.crowdsale.sellTokensPreIco({
             from: client1,
             value: purchaseOneEth,
@@ -873,17 +936,20 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         it('client 1 balance decreased after purchase', async () => {
           const client1BalanceAfter = ethBalance(client1).toNumber();
-          assertTrue(client1BalanceAfter <= this.client1BalanceBefore.sub(this.client1AmountOfPurchase).toNumber());
+          assertTrue(client1BalanceAfter <=
+            this.client1BalanceBefore.sub(this.client1AmountOfPurchase).toNumber());
         });
 
         it('client 2 balance decreased after purchase', async () => {
           const client2BalanceAfter = ethBalance(client2).toNumber();
-          assertTrue(client2BalanceAfter <= this.client2BalanceBefore.sub(purchaseHalfEth).toNumber());
+          assertTrue(client2BalanceAfter <=
+            this.client2BalanceBefore.sub(purchaseHalfEth).toNumber());
         });
 
         it('withdrawal wallet 1 balance after purchase', async () => {
           const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-          this.client1Withdrawal1Value = getPercent(this.client1AmountOfPurchase, withdrawal1Percent);
+          this.client1Withdrawal1Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal1Percent);
           this.client2Withdrawal1Value = getPercent(purchaseHalfEth, withdrawal1Percent);
           assertEqual(
             withdrawal1BalanceAfter,
@@ -896,7 +962,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
 
         it('withdrawal wallet 2 balance after purchase', async () => {
           const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-          this.client1Withdrawal2Value = getPercent(this.client1AmountOfPurchase, withdrawal2Percent);
+          this.client1Withdrawal2Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal2Percent);
           this.client2Withdrawal2Value = getPercent(purchaseHalfEth, withdrawal2Percent);
           assertEqual(
             withdrawal2BalanceAfter,
@@ -908,7 +975,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         it('withdrawal wallet 3 balance after purchase', async () => {
           const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-          this.client1Withdrawal3Value = getPercent(this.client1AmountOfPurchase, withdrawal3Percent);
+          this.client1Withdrawal3Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal3Percent);
           this.client2Withdrawal3Value = getPercent(purchaseHalfEth, withdrawal3Percent);
           assertEqual(
             withdrawal3BalanceAfter,
@@ -937,7 +1005,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           );
         });
         it('pre-ICO tokens remaining after purchase', async () => {
-          const tokensRemainingPreIcoAfter = (await this.crowdsale.tokensRemainingPreIco()).toNumber();
+          const tokensRemainingPreIcoAfter = (
+            await this.crowdsale.tokensRemainingPreIco()).toNumber();
           assertEqual(
             tokensRemainingPreIcoAfter,
             this.tokensRemainingPreIcoBefore
@@ -966,8 +1035,7 @@ contract('MocrowCoinCrowdsale', function (wallets) {
             this.client1TokensBefore
               .add(this.client1AmountOfPurchase
                 .div(this.preIcoTokenRate)
-                .mul(10 ** this.preIcoTokenRateNegativeDecimals)
-              ),
+                .mul(10 ** this.preIcoTokenRateNegativeDecimals)),
           );
         });
         it('tokens amount of client 2 after purchase', async () => {
@@ -977,8 +1045,7 @@ contract('MocrowCoinCrowdsale', function (wallets) {
             this.client1TokensBefore
               .add(purchaseHalfEth
                 .div(this.preIcoTokenRate)
-                .mul(10 ** this.preIcoTokenRateNegativeDecimals)
-              ),
+                .mul(10 ** this.preIcoTokenRateNegativeDecimals)),
           );
         });
 
@@ -991,88 +1058,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(investment2Value, purchaseHalfEth.toNumber());
         });
       });
-
-      // describe('purchase more then remaining tokens:', () => {
-      //   // only with function like below in contract
-      //   // function dropTokensRemainingPreIcoToMinimum() public {
-      //   //   tokensRemainingPreIco = 11152 * (10 ** 18);
-      //   //   tokensRemainingIco = HARDCAP_TOKENS_ICO + tokensRemainingPreIco;
-      //   // }
-      //   before(async () => {
-      //     await defaultBefore();
-      //     await timeController.addSeconds(preIcoStartShift);
-      //     await this.crowdsale.dropTokensRemainingPreIcoToMinimum({ from: owner });
-      //     this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensPreIco.add(purchaseOneEth);
-      //     await this.crowdsale.sellTokensPreIco({
-      //       from: client1,
-      //       value: this.purchaseMoreThenRemaining,
-      //     });
-      //   });
-      //   it('client 1 balance decreased after purchase', async () => {
-      //     const client1BalanceAfter = ethBalance(client1).toNumber();
-      //     assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
-      //   });
-      //
-      //   it('withdrawal wallet 1 balance after purchase', async () => {
-      //     const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-      //     this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal1Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal1BalanceAfter,
-      //       this.withdrawal1BalanceBefore
-      //         .add(this.client1Withdrawal1Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //
-      //   it('withdrawal wallet 2 balance after purchase', async () => {
-      //     const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-      //     this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal2Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal2BalanceAfter,
-      //       this.withdrawal2BalanceBefore
-      //         .add(this.client1Withdrawal2Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('withdrawal wallet 3 balance after purchase', async () => {
-      //     const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-      //     this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensPreIco, withdrawal3Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal3BalanceAfter,
-      //       this.withdrawal3BalanceBefore
-      //         .add(this.client1Withdrawal3Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('withdrawal wallet 4 balance after purchase', async () => {
-      //     const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
-      //     this.client1Withdrawal4Value = weiEquivalentToRemainingTokensPreIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
-      //     assertEqualBigNumbers(
-      //       withdrawal4BalanceAfter,
-      //       this.withdrawal4BalanceBefore
-      //         .add(this.client1Withdrawal4Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('pre-ICO tokens remaining after purchase', async () => {
-      //     const tokensRemainingPreIcoAfter = (await this.crowdsale.tokensRemainingPreIco()).toNumber();
-      //     assertEqual(tokensRemainingPreIcoAfter, 0);
-      //   });
-      //   it('ICO tokens remaining after purchase', async () => {
-      //     const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
-      //     assertEqual(tokensRemainingIcoAfter, icoHardcap);
-      //   });
-      //
-      //   it('tokens amount of client 1 after purchase', async () => {
-      //     const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
-      //     assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(weiEquivalentToRemainingTokensPreIco.div(tokenRatePreIco)).toNumber());
-      //   });
-      //
-      //   it('investor(client) 1 purchase value', async () => {
-      //     const investment1Value = (await this.crowdsale.investmentsPreIco(client1)).toNumber();
-      //     assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensPreIco.toNumber());
-      //   });
-      // });
     });
   });
 
@@ -1102,7 +1087,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       this.endTimeIco = endTimeIco;
 
       this.tokensRemainingIcoBefore = await this.crowdsale.tokensRemainingIco();
-      this.compaignAllocationAndBonusRemainingTokens = await this.crowdsale.compaignAllocationAndBonusRemainingTokens();
+      this.compaignAllocationAndBonusRemainingTokens =
+        await this.crowdsale.compaignAllocationAndBonusRemainingTokens();
       this.withdrawal1BalanceBefore = ethBalance(withdrawal1);
       this.withdrawal2BalanceBefore = ethBalance(withdrawal2);
       this.withdrawal3BalanceBefore = ethBalance(withdrawal3);
@@ -1121,8 +1107,12 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(newTokensRemainingIcoAfter, this.tokensRemainingIcoBefore.toNumber());
         });
         it('compaignAllocationAndBonusRemainingTokens wasn\'t changed', async () => {
-          const newCompaignAllocationAndBonusRemainingTokensAfter = (await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
-          assertEqual(newCompaignAllocationAndBonusRemainingTokensAfter, this.compaignAllocationAndBonusRemainingTokens.toNumber());
+          const newCompaignAllocationAndBonusRemainingTokensAfter = (
+            await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
+          assertEqual(
+            newCompaignAllocationAndBonusRemainingTokensAfter,
+            this.compaignAllocationAndBonusRemainingTokens.toNumber(),
+          );
         });
         it('withdrawal1 balance wasn\'t changed', async () => {
           const newWithdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
@@ -1141,15 +1131,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(newWithdrawal4BalanceAfter, this.withdrawal4BalanceBefore.toNumber());
         });
 
-        // it('client1 balance wasn\'t changed', async () => {
-        //   const newClient1BalanceAfter = ethBalance(client1).toNumber();
-        //   assertEqual(newClient1BalanceAfter, this.client1BalanceBefore.toNumber());
-        // });
-        // it('client2 balance wasn\'t changed', async () => {
-        //   const newClient2BalanceAfter = ethBalance(client2).toNumber();
-        //   assertEqual(newClient2BalanceAfter, this.client2BalanceBefore.toNumber());
-        // });
-
         it('tokens of client1 wasn\'t changed', async () => {
           const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
           assertEqual(newClient1TokensAfter, this.client1TokensBefore.toNumber());
@@ -1159,11 +1140,13 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(newClient2TokensAfter, this.client2TokensBefore.toNumber());
         });
         it('investments of client1 wasn\'t changed', async () => {
-          const newClient1InvestentAmountAfter = (await this.crowdsale.investmentsIco(client1)).toNumber();
+          const newClient1InvestentAmountAfter = (
+            await this.crowdsale.investmentsIco(client1)).toNumber();
           assertEqual(newClient1InvestentAmountAfter, this.client1InvestentAmountBefore.toNumber());
         });
         it('investments of client2 wasn\'t changed', async () => {
-          const newClient2InvestentAmountAfter = (await this.crowdsale.investmentsIco(client2)).toNumber();
+          const newClient2InvestentAmountAfter = (
+            await this.crowdsale.investmentsIco(client2)).toNumber();
           assertEqual(newClient2InvestentAmountAfter, this.client2InvestentAmountBefore.toNumber());
         });
       };
@@ -1182,7 +1165,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         describe('after', () => {
           before(async () => {
             await timeController.addSeconds(icoEnd);
-            const sellTokensIco = this.crowdsale.sellTokensIco({ from: client2, value: purchaseOneEth });
+            const sellTokensIco =
+              this.crowdsale.sellTokensIco({ from: client2, value: purchaseOneEth });
             await sellTokensIco.should.be.rejectedWith(EVMThrow);
           });
           nothingWasChanged();
@@ -1226,27 +1210,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         nothingWasChanged();
       });
-      // describe('tokensRemainingIco == 0:', () => {
-      //   // only with function like below in contract;
-      //   //
-      //   // function dropTokensRemaining() public {
-      //   //   tokensRemainingPreIco = 0;
-      //   //   tokensRemainingIco = 0;
-      //   // }
-      //   before(async () => {
-      //     await defaultBefore();
-      //     await timeController.addSeconds(preIcoStartShift);
-      //     await this.crowdsale.dropTokensRemaining();
-      //     this.tokensRemainingPreIcoBefore = ether(0);
-      //     this.tokensRemainingIcoBefore = ether(0);
-      //     const sellTokensPreIco = this.crowdsale.sellTokensPreIco({
-      //       from: client1,
-      //       value: minimalInvestment,
-      //     });
-      //     await sellTokensPreIco.should.be.rejectedWith(EVMThrow);
-      //   });
-      //   nothingWasChanged();
-      // });
     });
     describe('right parameters:', () => {
       describe('common requests:', () => {
@@ -1255,7 +1218,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         before(async () => {
           await defaultBefore();
           await timeController.addSeconds(icoStartShift);
-          this.compaignAllocationAndBonusRemainingTokens = await this.crowdsale.compaignAllocationAndBonusRemainingTokens();
+          this.compaignAllocationAndBonusRemainingTokens =
+            await this.crowdsale.compaignAllocationAndBonusRemainingTokens();
           await this.crowdsale.sellTokensIco({
             from: client1,
             value: purchaseOneEth,
@@ -1274,28 +1238,34 @@ contract('MocrowCoinCrowdsale', function (wallets) {
             from: client2,
             value: purchaseHalfEth,
           });
-          this.client1AmountOfPurchase = purchaseOneEth.add(maximalInvestment);
+          // this.client1AmountOfPurchase = purchaseOneEth.add(maximalInvestment);
+          this.client1AmountOfPurchase = maximalInvestment;
           this.client2AmountOfPurchase = minimalFivePercentBonusByValue.add(purchaseHalfEth);
           const client1FirstPurchaseBonuses = purchaseOneEth.div(tokenRateIco).mul(bonus2);
           const bonusSum = (bonus1 + bonus2).toFixed(2);
-          const client1SecondPurchaseBonuses = maximalInvestment.div(tokenRateIco).mul(parseFloat(bonusSum));
+          const client1SecondPurchaseBonuses =
+            (maximalInvestment.sub(purchaseOneEth)).div(tokenRateIco).mul(parseFloat(bonusSum));
           this.client1BonusTokens = client1FirstPurchaseBonuses.add(client1SecondPurchaseBonuses);
           this.client2BonusTokens = minimalFivePercentBonusByValue.div(tokenRateIco).mul(bonus1);
         });
         it('client 1 balance decreased after purchase', async () => {
           const client1BalanceAfter = ethBalance(client1).toNumber();
-          assertTrue(client1BalanceAfter <= this.client1BalanceBefore.sub(this.client1AmountOfPurchase).toNumber());
+          assertTrue(client1BalanceAfter <=
+            this.client1BalanceBefore.sub(this.client1AmountOfPurchase).toNumber());
         });
 
         it('client 2 balance decreased after purchase', async () => {
           const client2BalanceAfter = ethBalance(client2).toNumber();
-          assertTrue(client2BalanceAfter <= this.client2BalanceBefore.sub(this.client2AmountOfPurchase).toNumber());
+          assertTrue(client2BalanceAfter <=
+            this.client2BalanceBefore.sub(this.client2AmountOfPurchase).toNumber());
         });
 
         it('withdrawal wallet 1 balance after purchase', async () => {
           const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-          this.client1Withdrawal1Value = getPercent(this.client1AmountOfPurchase, withdrawal1Percent);
-          this.client2Withdrawal1Value = getPercent(this.client2AmountOfPurchase, withdrawal1Percent);
+          this.client1Withdrawal1Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal1Percent);
+          this.client2Withdrawal1Value =
+            getPercent(this.client2AmountOfPurchase, withdrawal1Percent);
           assertEqual(
             withdrawal1BalanceAfter,
             this.withdrawal1BalanceBefore
@@ -1307,8 +1277,10 @@ contract('MocrowCoinCrowdsale', function (wallets) {
 
         it('withdrawal wallet 2 balance after purchase', async () => {
           const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-          this.client1Withdrawal2Value = getPercent(this.client1AmountOfPurchase, withdrawal2Percent);
-          this.client2Withdrawal2Value = getPercent(this.client2AmountOfPurchase, withdrawal2Percent);
+          this.client1Withdrawal2Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal2Percent);
+          this.client2Withdrawal2Value =
+            getPercent(this.client2AmountOfPurchase, withdrawal2Percent);
           assertEqual(
             withdrawal2BalanceAfter,
             this.withdrawal2BalanceBefore
@@ -1319,8 +1291,10 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         it('withdrawal wallet 3 balance after purchase', async () => {
           const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-          this.client1Withdrawal3Value = getPercent(this.client1AmountOfPurchase, withdrawal3Percent);
-          this.client2Withdrawal3Value = getPercent(this.client2AmountOfPurchase, withdrawal3Percent);
+          this.client1Withdrawal3Value =
+            getPercent(this.client1AmountOfPurchase, withdrawal3Percent);
+          this.client2Withdrawal3Value =
+            getPercent(this.client2AmountOfPurchase, withdrawal3Percent);
           assertEqual(
             withdrawal3BalanceAfter,
             this.withdrawal3BalanceBefore
@@ -1349,12 +1323,17 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         });
         it('ICO tokens remaining after purchase', async () => {
           const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
-          const tokensToClients = this.client1AmountOfPurchase.add(this.client2AmountOfPurchase).div(tokenRateIco);
-          assertEqual(tokensRemainingIcoAfter, this.tokensRemainingIcoBefore.sub(tokensToClients).toNumber());
+          const tokensToClients =
+            this.client1AmountOfPurchase.add(this.client2AmountOfPurchase).div(tokenRateIco);
+          assertEqual(
+            tokensRemainingIcoAfter,
+            this.tokensRemainingIcoBefore.sub(tokensToClients).toNumber(),
+          );
         });
 
         it('compaign allocation and bonus remaining tokens after purchase', async () => {
-          const compaignAllocationAndBonusRemainingTokens = (await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
+          const compaignAllocationAndBonusRemainingTokens = (
+            await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
           assertEqual(
             compaignAllocationAndBonusRemainingTokens,
             this.compaignAllocationAndBonusRemainingTokens
@@ -1367,12 +1346,18 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         it('tokens amount of client 1 after purchase', async () => {
           const newClient1TokensAfter = await this.token.balanceOf(client1);
           const client1Tokens = this.client1AmountOfPurchase.div(tokenRateIco);
-          assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(client1Tokens).add(this.client1BonusTokens));
+          assertEqualBigNumbers(
+            newClient1TokensAfter,
+            this.client1TokensBefore.add(client1Tokens).add(this.client1BonusTokens),
+          );
         });
         it('tokens amount of client 2 after purchase', async () => {
           const newClient2TokensAfter = await this.token.balanceOf(client2);
           const client2Tokens = this.client2AmountOfPurchase.div(tokenRateIco);
-          assertEqualBigNumbers(newClient2TokensAfter, this.client1TokensBefore.add(client2Tokens).add(this.client2BonusTokens));
+          assertEqualBigNumbers(
+            newClient2TokensAfter,
+            this.client1TokensBefore.add(client2Tokens).add(this.client2BonusTokens),
+          );
         });
 
         it('investor(client) 1 purchase value', async () => {
@@ -1384,87 +1369,6 @@ contract('MocrowCoinCrowdsale', function (wallets) {
           assertEqual(investment2Value, this.client2AmountOfPurchase.toNumber());
         });
       });
-
-      // describe('purchase more then remaining tokens:', () => {
-      //   // only with function like below in contract
-      //   // function dropTokensRemainingIcoToMinimum() public {
-      //   //   tokensRemainingPreIco = 0;
-      //   //   tokensRemainingIco = 5576 * (10 ** 18);
-      //   // }
-      //   before(async () => {
-      //     await defaultBefore();
-      //     await timeController.addSeconds(icoStartShift);
-      //     await this.crowdsale.dropTokensRemainingIcoToMinimum({ from: owner });
-      //     await this.crowdsale.compaignAllocationAndBonusRemainingTokens({ from: owner });
-      //     this.purchaseMoreThenRemaining = weiEquivalentToRemainingTokensIco.add(purchaseOneEth);
-      //     await this.crowdsale.sellTokensIco({
-      //       from: client1,
-      //       value: this.purchaseMoreThenRemaining,
-      //     });
-      //   });
-      //   it('client 1 balance decreased after purchase', async () => {
-      //     const client1BalanceAfter = ethBalance(client1).toNumber();
-      //     assertTrue(client1BalanceAfter > this.client1BalanceBefore.sub(this.purchaseMoreThenRemaining).toNumber());
-      //   });
-      //
-      //   it('withdrawal wallet 1 balance after purchase', async () => {
-      //     const withdrawal1BalanceAfter = ethBalance(withdrawal1).toNumber();
-      //     this.client1Withdrawal1Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal1Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal1BalanceAfter,
-      //       this.withdrawal1BalanceBefore
-      //         .add(this.client1Withdrawal1Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //
-      //   it('withdrawal wallet 2 balance after purchase', async () => {
-      //     const withdrawal2BalanceAfter = ethBalance(withdrawal2).toNumber();
-      //     this.client1Withdrawal2Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal2Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal2BalanceAfter,
-      //       this.withdrawal2BalanceBefore
-      //         .add(this.client1Withdrawal2Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('withdrawal wallet 3 balance after purchase', async () => {
-      //     const withdrawal3BalanceAfter = ethBalance(withdrawal3).toNumber();
-      //     this.client1Withdrawal3Value = getPercent(weiEquivalentToRemainingTokensIco, withdrawal3Percent);
-      //     assertEqualBigNumbers(
-      //       withdrawal3BalanceAfter,
-      //       this.withdrawal3BalanceBefore
-      //         .add(this.client1Withdrawal3Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('withdrawal wallet 4 balance after purchase', async () => {
-      //     const withdrawal4BalanceAfter = ethBalance(withdrawal4).toNumber();
-      //     this.client1Withdrawal4Value = weiEquivalentToRemainingTokensIco.sub(this.client1Withdrawal1Value.add(this.client1Withdrawal2Value).add(this.client1Withdrawal3Value));
-      //     assertEqualBigNumbers(
-      //       withdrawal4BalanceAfter,
-      //       this.withdrawal4BalanceBefore
-      //         .add(this.client1Withdrawal4Value)
-      //         .toNumber(),
-      //     );
-      //   });
-      //   it('ICO tokens remaining after purchase', async () => {
-      //     const tokensRemainingIcoAfter = (await this.crowdsale.tokensRemainingIco()).toNumber();
-      //     assertEqual(tokensRemainingIcoAfter, 0);
-      //   });
-      //
-      //   it('tokens amount of client 1 after purchase', async () => {
-      //     const newClient1TokensAfter = (await this.token.balanceOf(client1)).toNumber();
-      //     const bonusSum = (bonus1 + bonus1).toFixed(2); // time and value bonuses
-      //     const tokensAmount = weiEquivalentToRemainingTokensIco.div(tokenRateIco);
-      //     const client1PurchaseBonuses = tokensAmount.mul(parseFloat(bonusSum));
-      //     assertEqualBigNumbers(newClient1TokensAfter, this.client1TokensBefore.add(tokensAmount).add(client1PurchaseBonuses).toNumber());
-      //   });
-      //   it('investor(client) 1 purchase value', async () => {
-      //     const investment1Value = (await this.crowdsale.investmentsIco(client1)).toNumber();
-      //     assertEqualBigNumbers(investment1Value, weiEquivalentToRemainingTokensIco.toNumber());
-      //   });
-      // });
     });
   });
 
@@ -1491,20 +1395,13 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     describe('wrong parameters:', () => {
       before(defaultBefore);
       const nothingWasChanged = () => {
-        it('token owner wasn\'t changed', async () => {
-          const newTokenOwner = await this.token.owner();
-          assertEqual(newTokenOwner, this.crowdsale.address);
-        });
-        it('whitelist owner wasn\'t changed', async () => {
-          const newWhitelistOwner = await this.whitelist.owner();
-          assertEqual(newWhitelistOwner, this.crowdsale.address);
-        });
         it('campaign allocation tokens amount wasn\'t changed', async () => {
           const newCampaignAllocationBalance = (await this.token.balanceOf(client1)).toNumber();
           assertEqual(newCampaignAllocationBalance, this.balanceAfterTransfer || 0);
         });
         it('compaignAllocationAndBonusRemainingTokens wasn\'t changed', async () => {
-          const newCompaignAllocationAndBonusRemainingTokens = (await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
+          const newCompaignAllocationAndBonusRemainingTokens = (
+            await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
           assertEqual(
             newCompaignAllocationAndBonusRemainingTokens,
             this.remainingTokensAfterTransfer === undefined ?
@@ -1515,7 +1412,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       };
       describe('not after ICO sale period:', () => {
         before(async () => {
-          const transferTokens = this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
+          const transferTokens =
+            this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
           await transferTokens.should.be.rejectedWith(EVMThrow);
         });
         nothingWasChanged();
@@ -1523,7 +1421,8 @@ contract('MocrowCoinCrowdsale', function (wallets) {
       describe('not owner or administrator:', () => {
         before(async () => {
           await timeController.addSeconds(icoEnd);
-          const transferTokens = this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: client3 });
+          const transferTokens =
+            this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: client3 });
           await transferTokens.should.be.rejectedWith(EVMThrow);
         });
         nothingWasChanged();
@@ -1532,29 +1431,13 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         before(async () => {
           await this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
           this.balanceAfterTransfer = (await this.token.balanceOf(client1)).toNumber();
-          this.remainingTokensAfterTransfer = (await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
-          const transferTokens = this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
+          this.remainingTokensAfterTransfer = (
+            await this.crowdsale.compaignAllocationAndBonusRemainingTokens()).toNumber();
+          const transferTokens =
+            this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
           await transferTokens.should.be.rejectedWith(EVMThrow);
         });
         nothingWasChanged();
-      });
-    });
-    describe('right parameter:', () => {
-      describe('request with change owners:', () => {
-        before(async () => {
-          await defaultBefore();
-          await timeController.addSeconds(icoEnd);
-          await this.crowdsale.transferUnsoldTokens({ from: owner });
-          await this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
-        });
-        it('token owner was changed', async () => {
-          const newTokenOwner = await this.token.owner();
-          assertEqual(newTokenOwner, owner);
-        });
-        it('whitelist owner was changed', async () => {
-          const newWhitelistOwner = await this.whitelist.owner();
-          assertEqual(newWhitelistOwner, owner);
-        });
       });
     });
   });
@@ -1582,21 +1465,17 @@ contract('MocrowCoinCrowdsale', function (wallets) {
     describe('wrong parameters:', () => {
       before(defaultBefore);
       const nothingWasChanged = () => {
-        it('token owner wasn\'t changed', async () => {
-          const newTokenOwner = await this.token.owner();
-          assertEqual(newTokenOwner, this.crowdsale.address);
-        });
-        it('whitelist owner wasn\'t changed', async () => {
-          const newWhitelistOwner = await this.whitelist.owner();
-          assertEqual(newWhitelistOwner, this.crowdsale.address);
-        });
         it('remaining ICO tokens amount wasn\'t changed', async () => {
           const newUnsoldTokensBalance = (await this.token.balanceOf(client1)).toNumber();
           assertEqual(newUnsoldTokensBalance, this.balanceAfterTransfer || 0);
         });
         it('tokensRemainingIco wasn\'t changed', async () => {
           const newTokensRemainingIco = (await this.crowdsale.tokensRemainingIco()).toNumber();
-          assertEqual(newTokensRemainingIco, this.remainingTokensAfterTransfer === undefined ? tokensRemainingIco.toNumber() : this.remainingTokensAfterTransfer);
+          assertEqual(
+            newTokensRemainingIco,
+            this.remainingTokensAfterTransfer ===
+              undefined ? tokensRemainingIco.toNumber() : this.remainingTokensAfterTransfer,
+          );
         });
       };
       describe('not after ICO sale period:', () => {
@@ -1618,9 +1497,62 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         before(async () => {
           await this.crowdsale.transferUnsoldTokens({ from: owner });
           this.balanceAfterTransfer = (await this.token.balanceOf(client1)).toNumber();
-          this.remainingTokensAfterTransfer = (await this.crowdsale.tokensRemainingIco()).toNumber();
+          this.remainingTokensAfterTransfer = (
+            await this.crowdsale.tokensRemainingIco()).toNumber();
           const transferTokens = this.crowdsale.transferUnsoldTokens({ from: owner });
           await transferTokens.should.be.rejectedWith(EVMThrow);
+        });
+        nothingWasChanged();
+      });
+    });
+  });
+
+  describe('#transferOwnershipForTokenAndWhitelist()', function () {
+    const defaultBefore = async () => {
+      const { startTimePreIco } = getDefaultPreIcoDates();
+      this.crowdsale = await MocrowCoinCrowdsale.new(
+        withdrawal1,
+        withdrawal2,
+        withdrawal3,
+        withdrawal4,
+        client3,
+        founders,
+        bountyProgram,
+        client1,
+        client2,
+        startTimePreIco,
+      );
+      this.token = MocrowCoin.at(await this.crowdsale.token());
+      this.whitelist = Whitelist.at(await this.crowdsale.whitelist());
+
+      this.endTimeIco = await this.crowdsale.endTimeIco();
+    };
+    describe('wrong parameters:', () => {
+      before(defaultBefore);
+      const nothingWasChanged = () => {
+        it('token owner wasn\'t changed', async () => {
+          const newTokenOwner = await this.token.owner();
+          assertEqual(newTokenOwner, this.crowdsale.address);
+        });
+        it('whitelist owner wasn\'t changed', async () => {
+          const newWhitelistOwner = await this.whitelist.owner();
+          assertEqual(newWhitelistOwner, this.crowdsale.address);
+        });
+      };
+      describe('not after ICO sale period:', () => {
+        before(async () => {
+          const transferOwnership =
+              this.crowdsale.transferOwnershipForTokenAndWhitelist({ from: owner });
+          await transferOwnership.should.be.rejectedWith(EVMThrow);
+        });
+        nothingWasChanged();
+      });
+      describe('not owner or administrator:', () => {
+        before(async () => {
+          await timeController.addSeconds(icoEnd);
+          const transferOwnership =
+              this.crowdsale.transferOwnershipForTokenAndWhitelist({ from: owner });
+          await transferOwnership.should.be.rejectedWith(EVMThrow);
         });
         nothingWasChanged();
       });
@@ -1630,8 +1562,9 @@ contract('MocrowCoinCrowdsale', function (wallets) {
         before(async () => {
           await defaultBefore();
           await timeController.addSeconds(icoEnd);
-          await this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
           await this.crowdsale.transferUnsoldTokens({ from: owner });
+          await this.crowdsale.transferRemainingCompaignAllocationAndBonusTokens({ from: owner });
+          await this.crowdsale.transferOwnershipForTokenAndWhitelist({ from: owner });
         });
         it('token owner was changed', async () => {
           const newTokenOwner = await this.token.owner();

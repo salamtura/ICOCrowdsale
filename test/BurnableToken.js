@@ -7,12 +7,17 @@ import {
   validAmountForOwner,
   invalidAmountForOwner,
   getDefaultWallets,
-} from './constants';
+} from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 
 contract('MocrowCoin', (wallets) => {
-  const { owner, founders, bountyProgram, client3 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    client3,
+  } = getDefaultWallets(wallets);
 
   beforeEach(async function () {
     this.token = await MocrowCoin.new(founders, bountyProgram, client3);
@@ -34,6 +39,7 @@ contract('MocrowCoin', (wallets) => {
         totalSupply.sub(validAmountForOwner).toNumber(),
       );
     });
+
     it('should burn tokens for an other account', async function () {
       await this.token.burn(validAmountForFounders, { from: founders });
 
@@ -49,23 +55,7 @@ contract('MocrowCoin', (wallets) => {
         totalSupply.sub(validAmountForFounders).toNumber(),
       );
     });
-    it('should not burn tokens if sender uses a zero amount of tokens to be burned', async function () {
-      const burn = this.token.burn(0, { from: owner });
 
-      await burn.should.be.rejectedWith(EVMThrow);
-
-      const ownerBalanceAfterBurn = (await this.token.balanceOf(owner)).toNumber();
-      assertEqual(
-        ownerBalanceAfterBurn,
-        ownerBalance.toNumber(),
-      );
-
-      const totalSupplyAfterBurn = (await this.token.totalSupply()).toNumber();
-      assertEqual(
-        totalSupplyAfterBurn,
-        totalSupply.toNumber(),
-      );
-    });
     it('should not burn tokens if sender does not has enough tokens to be burned', async function () {
       const burn = this.token.burn(invalidAmountForOwner, { from: owner });
 

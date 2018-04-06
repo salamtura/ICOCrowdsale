@@ -1,6 +1,7 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.19;
 
-import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "zeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /**
  * @title Whitelist contract
@@ -11,9 +12,10 @@ contract Whitelist is Ownable {
 
     uint256 public whitelistLength = 0;
 
-    function Whitelist() {
+    function Whitelist() public {
         owner = msg.sender;
     }
+
     /**
     * @dev Add wallet to whitelist.
     * @dev Accept request from the owner only.
@@ -45,5 +47,4 @@ contract Whitelist is Ownable {
     function isWhitelisted(address _wallet) constant public returns (bool) {
         return whitelist[_wallet];
     }
-
 }

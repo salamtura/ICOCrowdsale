@@ -1,20 +1,21 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.19;
 
 import "./Whitelist.sol";
 import "./Administrable.sol";
 
+
 contract Whitelistable is Administrable {
     Whitelist public whitelist;
 
-    modifier whenWhitelisted() {
-        require(isWhitelisted(msg.sender));
+    modifier whenWhitelisted(address _sender) {
+        require(isWhitelisted(_sender));
         _;
     }
 
     /**
     * @dev Constructor for Whitelistable contract.
     */
-    function Whitelistable() {
+    function Whitelistable() public {
         whitelist = new Whitelist();
     }
 
@@ -23,7 +24,7 @@ contract Whitelistable is Administrable {
     * @dev Accept request from the owner or administrator.
     * @param _wallet The address of wallet to add.
     */
-    function addWalletToWhitelist(address _wallet) onlyAdministratorOrOwner {
+    function addWalletToWhitelist(address _wallet) onlyAdministratorOrOwner public {
         whitelist.addWallet(_wallet);
     }
 
@@ -32,7 +33,7 @@ contract Whitelistable is Administrable {
     * @dev Accept request from the owner or administrator.
     * @param _wallet The address of whitelisted wallet to remove.
     */
-    function removeWalletFromWhitelist(address _wallet) onlyAdministratorOrOwner {
+    function removeWalletFromWhitelist(address _wallet) onlyAdministratorOrOwner public {
         whitelist.removeWallet(_wallet);
     }
 
@@ -40,7 +41,7 @@ contract Whitelistable is Administrable {
     * @dev Check the specified wallet whether it is in the whitelist.
     * @param _wallet The address of wallet to check.
     */
-    function isWhitelisted(address _wallet) constant returns (bool) {
+    function isWhitelisted(address _wallet) constant public returns (bool) {
         return whitelist.isWhitelisted(_wallet);
     }
 }

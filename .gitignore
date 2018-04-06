@@ -3,6 +3,7 @@
 # build
 #
 build
+contracts/Flattened.sol
 
 # node
 #
@@ -16,3 +17,8 @@ node_modules
 #
 coverage
 coverage.json
+coverageEnv
+
+# Package
+#
+package-lock.json

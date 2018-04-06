@@ -6,13 +6,19 @@ import {
   ownerBalance,
   totalSupply,
   getDefaultWallets,
-} from './constants';
+} from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 const RecipientContract = artifacts.require('RecipientContract');
 
 contract('MocrowCoin', (wallets) => {
-  const { owner, founders, bountyProgram, withdrawal1, client3 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    withdrawal1,
+    client3,
+  } = getDefaultWallets(wallets);
 
   describe('should have correct parameters', function () {
     const expectedTokenName = 'MOCROW';
@@ -38,12 +44,14 @@ contract('MocrowCoin', (wallets) => {
     });
 
     it('RESERVED_TOKENS_FOR_FOUNDERS', async () => {
-      const actualReservedTokensForFounders = (await this.token.RESERVED_TOKENS_FOR_FOUNDERS()).toNumber();
+      const actualReservedTokensForFounders = (
+        await this.token.RESERVED_TOKENS_FOR_FOUNDERS()).toNumber();
       assertEqual(actualReservedTokensForFounders, reservedTokensForFounders.toNumber());
     });
 
     it('RESERVED_TOKENS_FOR_BOUNTY_PROGRAM', async () => {
-      const actualReservedTokensForBountyProgram = (await this.token.RESERVED_TOKENS_FOR_BOUNTY_PROGRAM()).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.RESERVED_TOKENS_FOR_BOUNTY_PROGRAM()).toNumber();
       assertEqual(actualReservedTokensForBountyProgram, reservedTokensForBountyProgram.toNumber());
     });
 
@@ -72,7 +80,8 @@ contract('MocrowCoin', (wallets) => {
         reservedTokensForFounders.sub(validAmountForFounders).toNumber(),
       );
 
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(
         actualReservedTokensForBountyProgram,
         reservedTokensForBountyProgram.add(validAmountForFounders).toNumber(),
@@ -117,7 +126,8 @@ contract('MocrowCoin', (wallets) => {
         reservedTokensForFounders.toNumber(),
       );
 
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(
         actualReservedTokensForBountyProgram,
         reservedTokensForBountyProgram.toNumber(),
@@ -149,8 +159,6 @@ contract('MocrowCoin', (wallets) => {
       );
     });
 
-
-
     it('function transfer to freezed acсount', async () => {
       await this.token.freezeAccount(bountyProgram, { from: owner });
 
@@ -166,7 +174,8 @@ contract('MocrowCoin', (wallets) => {
         reservedTokensForFounders.sub(validAmountForFounders).toNumber(),
       );
 
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(
         actualReservedTokensForBountyProgram,
         reservedTokensForBountyProgram.add(validAmountForFounders).toNumber(),
@@ -197,8 +206,6 @@ contract('MocrowCoin', (wallets) => {
       );
     });
 
-
-
     it('should reject the request to function transfer if sender balance is frozen', async () => {
       await this.token.freezeAccount(founders, { from: owner });
 
@@ -216,7 +223,8 @@ contract('MocrowCoin', (wallets) => {
         reservedTokensForFounders.toNumber(),
       );
 
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(
         actualReservedTokensForBountyProgram,
         reservedTokensForBountyProgram.toNumber(),
@@ -291,7 +299,8 @@ contract('MocrowCoin', (wallets) => {
         reservedTokensForFounders.sub(validAmountForFounders).toNumber(),
       );
 
-      const actualReservedTokensForBountyProgram = (await this.token.balanceOf(bountyProgram)).toNumber();
+      const actualReservedTokensForBountyProgram = (
+        await this.token.balanceOf(bountyProgram)).toNumber();
       assertEqual(
         actualReservedTokensForBountyProgram,
         reservedTokensForBountyProgram.add(validAmountForFounders).toNumber(),

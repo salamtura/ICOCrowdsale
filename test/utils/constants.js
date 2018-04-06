@@ -1,4 +1,4 @@
-import { ether } from './utils';
+import { ether } from './';
 
 const ether1 = ether(1).toNumber();
 const div = 10;

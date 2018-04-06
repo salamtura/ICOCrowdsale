@@ -3,7 +3,7 @@ export const assertExpectedError = async (promise) => {
     await promise;
     throw new Error('Should have failed but did not!');
   } catch (error) {
-    assert.isTrue(error.message.indexOf('invalid opcode') >= 0, `Unexpected error message: ${error.message}`);
+    assert.isTrue(error.message.indexOf('VM Exception while processing transaction: revert') >= 0, `Unexpected error message: ${error.message}`);
   }
 };
 

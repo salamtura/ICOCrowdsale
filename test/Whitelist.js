@@ -1,10 +1,15 @@
 import { EVMThrow, assertEqual, assertTrue, assertFalse } from './utils';
-import { getDefaultWallets } from './constants';
+import { getDefaultWallets } from './utils/constants';
 
 const Whitelist = artifacts.require('Whitelist');
 
 contract('Whitelist', (wallets) => {
-  const { owner, founders, bountyProgram, withdrawal1 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    withdrawal1,
+  } = getDefaultWallets(wallets);
 
   beforeEach(async function () {
     // given

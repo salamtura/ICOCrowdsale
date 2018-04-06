@@ -1,10 +1,15 @@
 import { EVMThrow, assertEqual, assertTrue, assertFalse } from './utils';
-import { getDefaultWallets } from './constants';
+import { getDefaultWallets } from './utils/constants';
 
 const Administrable = artifacts.require('Administrable');
 
 contract('Administrable', (wallets) => {
-  const { owner, founders, bountyProgram, withdrawal1 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    withdrawal1,
+  } = getDefaultWallets(wallets);
 
   beforeEach(async function () {
     this.administrable = await Administrable.new({ from: owner });

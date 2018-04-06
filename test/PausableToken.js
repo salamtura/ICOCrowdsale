@@ -1,10 +1,15 @@
 import { EVMThrow, assertTrue, assertFalse } from './utils';
-import { getDefaultWallets } from './constants';
+import { getDefaultWallets } from './utils/constants';
 
 const MocrowCoin = artifacts.require('MocrowCoin');
 
 contract('MocrowCoin', (wallets) => {
-  const { owner, founders, bountyProgram, client3 } = getDefaultWallets(wallets);
+  const {
+    owner,
+    founders,
+    bountyProgram,
+    client3,
+  } = getDefaultWallets(wallets);
 
   beforeEach(async function () {
     // given
