@@ -26,7 +26,7 @@ contract Administrable is Ownable {
         _;
     }
 
-    function addAdministrator(address _admin) onlyOwner public {
+    function addAdministrator(address _admin) public onlyOwner {
         require(administratorsLength < 3);
         require(!administrators[_admin]);
         require(_admin != address(0) && _admin != owner);
@@ -34,14 +34,14 @@ contract Administrable is Ownable {
         administratorsLength++;
     }
 
-    function removeAdministrator(address _admin) onlyOwner public {
+    function removeAdministrator(address _admin) public onlyOwner {
         require(_admin != address(0));
         require(administrators[_admin]);
         administrators[_admin] = false;
         administratorsLength--;
     }
 
-    function isAdministrator(address _admin) public constant returns (bool) {
+    function isAdministrator(address _admin) public view returns (bool) {
         return administrators[_admin];
     }
 }

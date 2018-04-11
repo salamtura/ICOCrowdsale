@@ -86,9 +86,6 @@ contract('MocrowCoinCrowdsale', (wallets) => {
 
   const getPastTime = () => timeController.currentTimestamp().sub(100).toNumber();
 
-  const getDays = () =>
-    Math.floor(timeController.currentTimestamp().div(oneDayInSeconds).toNumber());
-
   const getDefaultIcoDates = () => {
     const startTimeIco = timeController.currentTimestamp().add(icoStartShift).toNumber();
     const endTimeIco = timeController.currentTimestamp().add(icoEnd).toNumber();
@@ -582,10 +579,6 @@ contract('MocrowCoinCrowdsale', (wallets) => {
       const actualPreIcoTokenRateNegativeDecimals = (
         await this.crowdsale.preIcoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualPreIcoTokenRateNegativeDecimals, newNegativeDecimals);
-
-      const actualLastDayChangePreIcoTokenRate = (
-        await this.crowdsale.lastDayChangePreIcoTokenRate()).toNumber();
-      assertEqual(actualLastDayChangePreIcoTokenRate, getDays());
     };
     before(async () => {
       const { startTimePreIco } = getDefaultPreIcoDates();
@@ -639,6 +632,7 @@ contract('MocrowCoinCrowdsale', (wallets) => {
         await tokenRateWasntChanged();
       });
       it('two changes token rate pre-ICO in one day', async () => {
+        await timeController.addSeconds(preIcoStartShift + oneDayInSeconds + 1);
         await this.crowdsale.changePreIcoTokenRate(
           newTokenRate1,
           newNegativeDecimals1,
@@ -662,7 +656,7 @@ contract('MocrowCoinCrowdsale', (wallets) => {
         await this.crowdsale.addAdministrator(client1, { from: owner });
       });
       it('changed token rate & negative decimals & last day of change rate in the next day after last change', async () => {
-        await timeController.addSeconds(oneDayInSeconds);
+        await timeController.addSeconds(oneDayInSeconds + 1);
         await this.crowdsale.changePreIcoTokenRate(
           newTokenRate2,
           newNegativeDecimals2,
@@ -685,10 +679,6 @@ contract('MocrowCoinCrowdsale', (wallets) => {
       const actualIcoTokenRateNegativeDecimals = (
         await this.crowdsale.icoTokenRateNegativeDecimals()).toNumber();
       assertEqual(actualIcoTokenRateNegativeDecimals, newNegativeDecimals);
-
-      const actualLastDayChangeIcoTokenRate = (
-        await this.crowdsale.lastDayChangeIcoTokenRate()).toNumber();
-      assertEqual(actualLastDayChangeIcoTokenRate, getDays());
     };
     before(async () => {
       const { startTimePreIco } = getDefaultPreIcoDates();
@@ -735,6 +725,7 @@ contract('MocrowCoinCrowdsale', (wallets) => {
         await tokenRateWasntChanged();
       });
       it('two changes token rate ICO in one day', async () => {
+        await timeController.addSeconds(preIcoStartShift + oneDayInSeconds + 1);
         await this.crowdsale.changeIcoTokenRate(
           newTokenRate1,
           newNegativeDecimals1,
@@ -754,7 +745,7 @@ contract('MocrowCoinCrowdsale', (wallets) => {
         await this.crowdsale.addAdministrator(client1, { from: owner });
       });
       it('changed token rate & negative decimals & last day of change rate in the next day after last change', async () => {
-        await timeController.addSeconds(oneDayInSeconds);
+        await timeController.addSeconds(oneDayInSeconds + 1);
         await this.crowdsale.changeIcoTokenRate(
           newTokenRate2,
           newNegativeDecimals2,

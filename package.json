@@ -1,7 +1,7 @@
 {
-  "name": "mocrowcoin-smart-contract",
+  "name": "mocrowcrowdsale-smart-contract",
   "version": "1.0.0",
-  "description": "MocrowCoin",
+  "description": "MocrowCrowdsale",
   "license": "MIT",
   "scripts": {
     "lint": "npm run eslint && npm run solium",
@@ -24,17 +24,17 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
-    "eslint": "^4.18.1",
+    "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-import": "^2.10.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.7.0",
     "lodash": "^4.17.5",
-    "solidity-coverage": "^0.4.9",
-    "solium": "^1.1.5",
-    "truffle": "^4.0.6",
-    "truffle-flattener": "^1.2.3",
+    "solidity-coverage": "^0.4.15",
+    "solium": "^1.1.6",
+    "truffle": "^4.1.5",
+    "truffle-flattener": "^1.2.5",
     "ethereumjs-testrpc-sc": "^6.0.7"
   }
 }

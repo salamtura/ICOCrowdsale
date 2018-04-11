@@ -71,7 +71,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     * @param _to The address to transfer to.
     * @param _value The amount to be transferred.
     */
-    function transfer(address _to, uint256 _value) whenNotPaused public returns (bool) {
+    function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {
         require(!isFrozen(msg.sender));
         super.transfer(_to, _value);
     }
@@ -83,7 +83,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     * @param _to address The address which you want to transfer to
     * @param _value uint256 the amount of tokens to be transferred
     */
-    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused public returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {
         require(!isFrozen(msg.sender));
         require(!isFrozen(_from));
         super.transferFrom(_from, _to, _value);
@@ -94,7 +94,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     * @param _to The address to transfer to.
     * @param _value The amount to be transferred.
     */
-    function transferFromIco(address _to, uint256 _value) onlyIco public returns (bool) {
+    function transferFromIco(address _to, uint256 _value) public onlyIco returns (bool) {
         super.transfer(_to, _value);
     }
 

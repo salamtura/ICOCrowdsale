@@ -24,7 +24,7 @@ contract Whitelistable is Administrable {
     * @dev Accept request from the owner or administrator.
     * @param _wallet The address of wallet to add.
     */
-    function addWalletToWhitelist(address _wallet) onlyAdministratorOrOwner public {
+    function addWalletToWhitelist(address _wallet) public onlyAdministratorOrOwner {
         whitelist.addWallet(_wallet);
     }
 
@@ -33,7 +33,7 @@ contract Whitelistable is Administrable {
     * @dev Accept request from the owner or administrator.
     * @param _wallet The address of whitelisted wallet to remove.
     */
-    function removeWalletFromWhitelist(address _wallet) onlyAdministratorOrOwner public {
+    function removeWalletFromWhitelist(address _wallet) public onlyAdministratorOrOwner {
         whitelist.removeWallet(_wallet);
     }
 
@@ -41,7 +41,7 @@ contract Whitelistable is Administrable {
     * @dev Check the specified wallet whether it is in the whitelist.
     * @param _wallet The address of wallet to check.
     */
-    function isWhitelisted(address _wallet) constant public returns (bool) {
+    function isWhitelisted(address _wallet) public view returns (bool) {
         return whitelist.isWhitelisted(_wallet);
     }
 }

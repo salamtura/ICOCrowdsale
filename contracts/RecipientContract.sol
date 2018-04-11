@@ -12,7 +12,7 @@ contract RecipientContract is Ownable {
 
     function RecipientContract() public { }
 
-    function setForward(address _to) onlyOwner public {
+    function setForward(address _to) public onlyOwner {
         require(_to != address(0));
         forwardTo = _to;
     }

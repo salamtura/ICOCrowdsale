@@ -77,11 +77,11 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
 
     MocrowCoin public token;
 
-    function isPreIco() constant public returns(bool) {
+    function isPreIco() public view returns(bool) {
         return startTimePreIco < now && now < endTimePreIco;
     }
 
-    function isIco() constant public returns(bool) {
+    function isIco() public view returns(bool) {
         return startTimeIco < now && now < endTimeIco;
     }
 
@@ -188,7 +188,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev The end time must be less than start time of ICO.
     * @param _startTimePreIco The start time which must be more than now time.
     */
-    function changePreIcoStartTime(uint256 _startTimePreIco) onlyAdministratorOrOwner beforePreIcoSalePeriod public {
+    function changePreIcoStartTime(uint256 _startTimePreIco) public onlyAdministratorOrOwner beforePreIcoSalePeriod {
         require(now < _startTimePreIco);
         uint256 _endTimePreIco = _startTimePreIco + (preIcoDurationDays * 1 days);
         require(_endTimePreIco < startTimeIco);
@@ -203,7 +203,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev The end time must be less than start time of ICO.
     * @param _startTimeIco The start time which must be more than end time of the pre-ICO and more than now time.
     */
-    function changeIcoStartTime(uint256 _startTimeIco) onlyAdministratorOrOwner beforeIcoSalePeriod public {
+    function changeIcoStartTime(uint256 _startTimeIco) public onlyAdministratorOrOwner beforeIcoSalePeriod {
         require(_startTimeIco > now && _startTimeIco > endTimePreIco);
 
         startTimeIco = _startTimeIco;
@@ -219,13 +219,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @param _preIcoTokenRate Pre-ICO rate of the token.
     * @param _negativeDecimals Number of decimals after comma.
     */
-    function changePreIcoTokenRate(uint256 _preIcoTokenRate, uint256 _negativeDecimals) onlyAdministratorOrOwner public {
-        uint256 dayNumber = now / (1 days);
-        require(dayNumber != lastDayChangePreIcoTokenRate);
+    function changePreIcoTokenRate(uint256 _preIcoTokenRate, uint256 _negativeDecimals) public onlyAdministratorOrOwner {
+        require(now > lastDayChangePreIcoTokenRate + 1 days);
 
         preIcoTokenRate = _preIcoTokenRate;
         preIcoTokenRateNegativeDecimals = _negativeDecimals;
-        lastDayChangePreIcoTokenRate = dayNumber;
+        lastDayChangePreIcoTokenRate = now;
     }
 
     /**
@@ -234,19 +233,18 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @param _icoTokenRate ICO rate of the token.
     * @param _negativeDecimals Number of decimals after comma.
     */
-    function changeIcoTokenRate(uint256 _icoTokenRate, uint256 _negativeDecimals) onlyAdministratorOrOwner public {
-        uint256 dayNumber = now / (1 days);
-        require(dayNumber != lastDayChangeIcoTokenRate);
+    function changeIcoTokenRate(uint256 _icoTokenRate, uint256 _negativeDecimals) public onlyAdministratorOrOwner {
+        require(now > lastDayChangeIcoTokenRate + 1 days);
 
         icoTokenRate = _icoTokenRate;
         icoTokenRateNegativeDecimals = _negativeDecimals;
-        lastDayChangeIcoTokenRate = dayNumber;
+        lastDayChangeIcoTokenRate = now;
     }
 
     /**
     * @dev Called by the owner or administrator to pause, triggers stopped state
     */
-    function pause() onlyAdministratorOrOwner whenNotPaused public {
+    function pause() public onlyAdministratorOrOwner whenNotPaused {
         paused = true;
         Pause();
     }
@@ -254,7 +252,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     /**
     * @dev Called by the owner or administrator to unpause, returns to normal state
     */
-    function unpause() onlyAdministratorOrOwner whenPaused public {
+    function unpause() public onlyAdministratorOrOwner whenPaused {
         paused = false;
         Unpause();
     }
@@ -264,11 +262,11 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensPreIco()
+    public payable
     preIcoSalePeriod
     whenWhitelisted(msg.sender)
     whenNotPaused
-    minimalInvestment(msg.value) 
-    public payable 
+    minimalInvestment(msg.value)
     {
         require(tokensRemainingPreIco > 0);
         uint256 excessiveFunds = 0;
@@ -305,12 +303,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Only administrator or owner can sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensForBTCPreIco(address _wallet, uint256 _weiAmount)
+    public
     onlyAdministratorOrOwner
     preIcoSalePeriod
     whenWhitelisted(_wallet)
     whenNotPaused
-    minimalInvestment(_weiAmount) 
-    public 
+    minimalInvestment(_weiAmount)
     {
         uint256 tokensAmount = _weiAmount.div(preIcoTokenRate).mul(10 ** preIcoTokenRateNegativeDecimals);
         require(tokensRemainingPreIco > tokensAmount);
@@ -322,11 +320,11 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensIco()
+    public payable
     icoSalePeriod
     whenWhitelisted(msg.sender)
     whenNotPaused
     minimalInvestment(msg.value)
-    public payable 
     {
         require(tokensRemainingIco > 0);
         uint256 excessiveFunds = 0;
@@ -363,12 +361,12 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Only administrator or owner can sell tokens only for whitelisted wallets if crawdsale is not paused.
     */
     function sellTokensForBTCIco(address _wallet, uint256 _weiAmount)
+    public
     onlyAdministratorOrOwner
     icoSalePeriod
     whenWhitelisted(_wallet)
     whenNotPaused
     minimalInvestment(_weiAmount)
-    public 
     {
         uint256 tokensAmount = _weiAmount.div(icoTokenRate).mul(10 ** icoTokenRateNegativeDecimals);
         require(tokensRemainingIco > tokensAmount);
@@ -379,7 +377,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Transfer unsold tokens.
     * @dev Transfer tokens only for administrators or owner and only after ICO period.
     */
-    function transferUnsoldTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
+    function transferUnsoldTokens() public onlyAdministratorOrOwner afterIcoSalePeriod {
         require(tokensRemainingIco > 0);
         token.transferFromIco(addressForUnsoldTokens, tokensRemainingIco);
         tokensRemainingIco = 0;
@@ -389,7 +387,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Transfer remaining compaign allocation and bonus tokens.
     * @dev Transfer tokens only for administrators or owner and only after ICO period.
     */
-    function transferRemainingCompaignAllocationAndBonusTokens() onlyAdministratorOrOwner afterIcoSalePeriod public {
+    function transferRemainingCompaignAllocationAndBonusTokens() public onlyAdministratorOrOwner afterIcoSalePeriod {
         require(compaignAllocationAndBonusRemainingTokens > 0);
         token.transferFromIco(addressForCampaignAllocation, compaignAllocationAndBonusRemainingTokens);
         compaignAllocationAndBonusRemainingTokens = 0;
@@ -399,7 +397,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Transfer ownership from ICO contract to the owner for token and whitelist contracts.
     * @dev Transfer ownership only for administrators or owner and only after ICO period.
     */
-    function transferOwnershipForTokenAndWhitelist() onlyAdministratorOrOwner afterIcoSalePeriod public {
+    function transferOwnershipForTokenAndWhitelist() public onlyAdministratorOrOwner afterIcoSalePeriod {
         require(compaignAllocationAndBonusRemainingTokens == 0 && tokensRemainingIco == 0);
         token.transferOwnership(owner);
         whitelist.transferOwnership(owner);
@@ -408,7 +406,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     /**
     * @dev Count the pre-ICO investors total.
     */
-    function getPreIcoInvestorsCount() constant public returns(uint256) {
+    function getPreIcoInvestorsCount() public view returns(uint256) {
         return investorsPreIco.length;
     }
 
@@ -416,7 +414,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Get the pre-ICO investor address.
     * @param _index the index of investor in the array. 
     */
-    function getPreIcoInvestor(uint256 _index) constant public returns(address) {
+    function getPreIcoInvestor(uint256 _index) public view returns(address) {
         return investorsPreIco[_index];
     }
 
@@ -424,14 +422,14 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Gets the total amount of investments for pre-ICO investor.
     * @param _investorPreIco the pre-ICO investor address.
     */
-    function getPreIcoInvestment(address _investorPreIco) constant public returns(uint256) {
+    function getPreIcoInvestment(address _investorPreIco) public view returns(uint256) {
         return investmentsPreIco[_investorPreIco];
     }
 
     /**
     * @dev Count the ICO investors total.
     */
-    function getIcoInvestorsCount() constant public returns(uint256) {
+    function getIcoInvestorsCount() public view returns(uint256) {
         return investorsIco.length;
     }
 
@@ -439,7 +437,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Get the ICO investor address.
     * @param _index the index of investor in the array. 
     */
-    function getIcoInvestor(uint256 _index) constant public returns(address) {
+    function getIcoInvestor(uint256 _index) public view returns(address) {
         return investorsIco[_index];
     }
 
@@ -447,7 +445,7 @@ contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     * @dev Gets the total amount of investments for ICO investor.
     * @param _investorIco the ICO investor address.
     */
-    function getIcoInvestment(address _investorIco) constant public returns(uint256) {
+    function getIcoInvestment(address _investorIco) public view returns(uint256) {
         return investmentsIco[_investorIco];
     }
 
