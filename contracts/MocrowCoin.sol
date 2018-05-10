@@ -18,15 +18,15 @@ interface tokenRecipient {
 
 
 contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
-    string constant public name = "MOCROW";
-    string constant public symbol = "MCW";
-    uint256 constant public decimals = 18;
+    string public constant name = "MOCROW";
+    string public constant symbol = "MCW";
+    uint8 public constant decimals = 18;
 
-    uint256 constant public RESERVED_TOKENS_FOR_FOUNDERS = 23500000 * (10 ** decimals);
-    uint256 constant public RESERVED_TOKENS_FOR_BOUNTY_PROGRAM = 9480000 * (10 ** decimals);
-    uint256 constant public RESERVED_TOKENS_FOR_PLATFORM_OPERATIONS = 70588235 * (10 ** decimals);
+    uint256 public constant RESERVED_TOKENS_FOR_FOUNDERS = 23500000 * (10 ** uint256(decimals));
+    uint256 public constant RESERVED_TOKENS_FOR_BOUNTY_PROGRAM = 9480000 * (10 ** uint256(decimals));
+    uint256 public constant RESERVED_TOKENS_FOR_PLATFORM_OPERATIONS = 70588235 * (10 ** uint256(decimals));
 
-    uint256 constant public TOTAL_SUPPLY_VALUE = 235294118 * (10 ** decimals);
+    uint256 public constant TOTAL_SUPPLY_VALUE = 235294118 * (10 ** uint256(decimals));
 
     address private addressIco;
 
@@ -73,7 +73,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     */
     function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {
         require(!isFrozen(msg.sender));
-        super.transfer(_to, _value);
+        return super.transfer(_to, _value);
     }
 
     /**
@@ -86,7 +86,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {
         require(!isFrozen(msg.sender));
         require(!isFrozen(_from));
-        super.transferFrom(_from, _to, _value);
+        return super.transferFrom(_from, _to, _value);
     }
 
     /**
@@ -95,7 +95,7 @@ contract MocrowCoin is StandardToken, BurnableToken, FreezableToken, Pausable {
     * @param _value The amount to be transferred.
     */
     function transferFromIco(address _to, uint256 _value) public onlyIco returns (bool) {
-        super.transfer(_to, _value);
+        return super.transfer(_to, _value);
     }
 
     /**

@@ -9,20 +9,20 @@ import "./Whitelistable.sol";
 contract MocrowCoinCrowdsale is Whitelistable, Pausable {
     using SafeMath for uint256;
 
-    uint256 constant public DECIMALS = 18;
+    uint256 public constant DECIMALS = 18;
 
-    uint256 constant public HARDCAP_TOKENS_PRE_ICO = 36000000 * (10 ** DECIMALS);
-    uint256 constant public HARDCAP_TOKENS_ICO = 84000000 * (10 ** DECIMALS);
-    uint256 constant public COMPAIGN_ALLOCATION_AND_BONUSES_TOKENS = 11725883 * (10 ** DECIMALS);
+    uint256 public constant HARDCAP_TOKENS_PRE_ICO = 36000000 * (10 ** DECIMALS);
+    uint256 public constant HARDCAP_TOKENS_ICO = 84000000 * (10 ** DECIMALS);
+    uint256 public constant COMPAIGN_ALLOCATION_AND_BONUSES_TOKENS = 11725883 * (10 ** DECIMALS);
 
-    uint256 constant public TOKEN_RATE_PRE_ICO = 17934;
-    uint256 constant public TOKEN_RATE_ICO = 35868;
+    uint256 public constant TOKEN_RATE_PRE_ICO = 17934;
+    uint256 public constant TOKEN_RATE_ICO = 35868;
 
-    uint256 constant public MINIMAL_INVESTMENT = 0.1 ether;
-    uint256 constant public MAXIMAL_INVESTMENT = 5 ether;
+    uint256 public constant MINIMAL_INVESTMENT = 0.1 ether;
+    uint256 public constant MAXIMAL_INVESTMENT = 5 ether;
 
-    uint256 constant public MINIMAL_TEN_PERCENT_BONUS_BY_VALUE = 3.5 ether;
-    uint256 constant public MINIMAL_FIVE_PERCENT_BONUS_BY_VALUE = 2.5 ether;
+    uint256 public constant MINIMAL_TEN_PERCENT_BONUS_BY_VALUE = 3.5 ether;
+    uint256 public constant MINIMAL_FIVE_PERCENT_BONUS_BY_VALUE = 2.5 ether;
 
     mapping(address => uint256) public investmentsPreIco;
     address[] private investorsPreIco;
